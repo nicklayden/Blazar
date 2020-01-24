@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     // eta_set_ex1.open("eta_set_ex1.dat");
     std::vector<std::vector<double> > file_input;
     file_input = read_file(r_init);
-
+    std::cout << "Sublime test\n";
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
     /**
