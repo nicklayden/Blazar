@@ -46,6 +46,26 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
 std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp_type));
 std::vector<std::vector<double> > read_file(std::ifstream& input);
 
+
+inline mp_type alan_f(mp_type r, mp_type k) {
+    // Alans specific prob. Just wanted a graph showing the function
+    // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
+    mp_type a,b,c,d,e,f,g,h;
+    a = sinh(k*(M_PI - r) + sinh(k*r));
+    b = cosh(k*(M_PI - r) - cosh(k*r));
+    c = sinh(k*(M_PI/2. + r) + sinh(k*(M_PI/2. - r)));
+    d = cosh(k*(M_PI/2. + r) - cosh(k*(M_PI/2. - r)));
+
+    e = -(1./sin(r));
+    f = -cos(r)/(sin(r)*sin(r));
+    g = 1./cos(r);
+    h = tan(r);
+
+    return e*(  f*a + k*b + g*( h*c + k*d )  );
+}
+
+
+
 int main(int argc, char** argv) {
     // Set multiprecision digits
     // std::setprecision(std::numeric_limits<mp_type>::max_digits10);
@@ -57,6 +77,8 @@ int main(int argc, char** argv) {
     // output file streams
     std::ofstream rhop_f,rhom_f,psim_f,psip_f,app_et_f,app_ct_f,e1_R,rho_ex1_f,mu_ex1_f,eta_set_ex1,test_num_sol,test2;
     std::ofstream eta_bang_f,eta_crunch_f;
+    std::ofstream alan_roots;
+    alan_roots.open("alanroots.dat");
 
     // eta_bang_f.open("eta_bang.dat");
     // eta_crunch_f.open("eta_crunch.dat");
@@ -96,7 +118,7 @@ int main(int argc, char** argv) {
         data_slice.clear();
     }
     
-
+    compute_and_save_zero_set(alan_f,time_example1,alan_roots);
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
@@ -162,7 +184,6 @@ int main(int argc, char** argv) {
                     tbracket.push_back(t_sol[j]);
                 }
             }
-            
         }
     }
     
@@ -249,12 +270,16 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     size_t z_n, eta_n;
 
     // grid definitions:
-    z_init = 0.;// + 1e-4;
-    z_end = 5.0;// - 1e-4;
-    eta_init = 0;// + 1e-4;
-    eta_end  = 2*PI - 1e-4;
-    z_n = 1000;
-    eta_n = 1000;
+    // z_init = 0.;// + 1e-4;
+    // z_end = 5.0;// - 1e-4;
+    // eta_init = 0;// + 1e-4;
+    // eta_end  = 2*PI - 1e-4;
+    z_init = M_PI/4. - 0.1;
+    z_end = M_PI/4. + 0.1;
+    eta_init = 1.01;
+    eta_end = 2.0;
+    z_n = 500;
+    eta_n = 500;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
