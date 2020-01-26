@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
     // eta_set_ex1.open("eta_set_ex1.dat");
     std::vector<std::vector<double> > file_input;
     file_input = read_file(r_init);
-    std::cout << "Sublime test\n";
+
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
     /**
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
         data_slice.clear();
     }
     
-    compute_and_save_zero_set(alan_f,time_example1,alan_roots);
+    // compute_and_save_zero_set(alan_f,time_example1,alan_roots);
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);

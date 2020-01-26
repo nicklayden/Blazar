@@ -9,6 +9,13 @@
 #include <math.h>
 #include <complex>
 #include <fstream>
+#include <iostream>
+
+// Type definitions
+// typedef boost::multiprecision::cpp_dec_float_50 mp_type;
+namespace mp = boost::multiprecision;
+typedef mp::mpfr_float_100 mp_type; // faster compile time
+
 
 template <class T>
 T steffensen(T (*f)(T,T), T x0, T x1, T eta, size_t iter) {
@@ -161,4 +168,91 @@ std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > 
         section.clear();
     }
     return noNAN;
+}
+
+
+
+class ZeroSetFinder
+{
+    /*
+        Create an N dimensional grid,
+
+        operator() should take a function of N variables
+
+        iterate through all grids to construct a zero set
+
+        return the zero set as a column of points in N-D space
+
+        The domain input:
+            NxM vector: N dimensions(rows) by M grid points (columns)
+        
+    */
+    public:
+        ZeroSetFinder(std::vector<std::vector<mp_type> > Ndomain)
+        :Ndomain(Ndomain) {
+            N_dim = Ndomain.size();
+        };
+        ~ZeroSetFinder() {
+            // Quick vector cleanup just to be sure.
+            Zero_set.clear();
+            Bracket_left_set.clear();
+            Bracket_right_set.clear();
+            Ndomain.clear();
+        };
+    
+        // Functions 
+        void compute_zero_set();
+        void Save(std::string file);
+        void print_zero_set();
+
+
+        // operator overloads
+        void operator()(mp_type (*f)(mp_type,mp_type)){
+            // Here we want to use the domain and number of dimensions to
+            // apply to a function and root find if we can.
+            // essentially: bracket, then refine with secant or something else.
+
+
+
+        }
+
+        // Variables
+        std::string output_file;
+        // NB: Store zero sets as vectors of points (vector of vectors)
+        //     so that this is generalizable to ND problems.
+        std::vector<std::vector<mp_type> > Zero_set,Bracket_left_set,Bracket_right_set;
+        std::vector<std::vector<mp_type> > Ndomain, surface;
+        std::vector<double> Zero_set_trunc;
+        size_t N_dim;
+
+
+
+
+    private:
+        // Private functions
+        void Construct_file_stream();
+        void compute_surface(mp_type (*f)(mp_type,mp_type));
+        void bracket_roots(mp_type (*f)(mp_type,mp_type));
+
+        // Private variables
+        std::ofstream output_stream;
+
+
+
+};
+
+python mult
+void ZeroSetFinder::compute_surface() {
+    // Taking the domain inputs, create a N-Dim array of the functions values
+    std::vector<mp_type> Frame_line;
+    // Loop for surface frames. Compute f(x,y) at each x,y in grid.
+    for (size_t i = 0; i < Ndomain[0].size(); i++) {
+        // Naive parallelization. Maybe update this block?
+        // #pragma omp parallel for schedule(static)
+        for (size_t j = 0; j < Ndomain[1].size(); j++) {
+            // Figure[i][j] = f(z_grid[i],eta_grid[j]);  
+            Frame_line.push_back(f(Ndomain[0][i],Ndomain[1][j]));
+        }
+        surface.push_back(Frame_line);
+        Frame_line.clear();
 }
