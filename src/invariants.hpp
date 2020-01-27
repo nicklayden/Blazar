@@ -2,7 +2,7 @@
 /**
  * Functions for the Cartan invariants.
  * Created from the maple output with CodeGeneration + a custom
- * python script
+ * python script: maple_translator.py
  * 
 */
 // Boost libraries
