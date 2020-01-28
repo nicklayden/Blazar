@@ -11,6 +11,8 @@
 #include <fstream>
 #include <iostream>
 
+#include <boost/function.hpp>
+
 // Type definitions
 // typedef boost::multiprecision::cpp_dec_float_50 mp_type;
 namespace mp = boost::multiprecision;
@@ -172,87 +174,87 @@ std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > 
 
 
 
-// class ZeroSetFinder
-// {
-//     /*
-//         Create an N dimensional grid,
+class ZeroSetFinder
+{
+    /*
+        Create an N dimensional grid,
 
-//         operator() should take a function of N variables
-//         -- issue doing this..
+        operator() should take a function of N variables
+        -- issue doing this..
 
-//         iterate through all grids to construct a zero set
+        iterate through all grids to construct a zero set
 
-//         return the zero set as a column of points in N-D space
+        return the zero set as a column of points in N-D space
 
-//         The domain input:
-//             NxM vector: N dimensions(rows) by M grid points (columns)
+        The domain input:
+            NxM vector: N dimensions(rows) by M grid points (columns)
         
-//     */
-//     public:
-//         ZeroSetFinder(std::vector<std::vector<mp_type> > Ndomain)
-//         :Ndomain(Ndomain) {
-//             N_dim = Ndomain.size();
-//         };
-//         ~ZeroSetFinder() {
-//             // Quick vector cleanup just to be sure.
-//             Zero_set.clear();
-//             Bracket_left_set.clear();
-//             Bracket_right_set.clear();
-//             Ndomain.clear();
-//         };
+    */
+    public:
+        // Constructor 
+        ZeroSetFinder(mp_type (*f_in)(mp_type, mp_type),std::vector<std::vector<mp_type> > Ndomain)
+        :Ndomain(Ndomain) {
+            N_dim = Ndomain.size();
+            std::cout << "Create finder.\n";
+            std::cout << "Dimension: " << N_dim << std::endl;
+            f = f_in;
+
+
+        };
+
+        // Destructor, clear vectors and free memory!
+        ~ZeroSetFinder() {
+            // Quick vector cleanup just to be sure.
+            Zero_set.clear();
+            Bracket_left_set.clear();
+            Bracket_right_set.clear();
+            Ndomain.clear();
+        };
     
-//         // Functions 
-//         void compute_zero_set();
-//         void Save(std::string file);
-//         void print_zero_set();
+        // Functions 
+        void compute_zero_set();
+        void Save(std::string file);
+        void print_zero_set();
 
 
-//         // operator overloads
-//         void operator()(mp_type (*f)(mp_type,mp_type)){
-//             // Here we want to use the domain and number of dimensions to
-//             // apply to a function and root find if we can.
-//             // essentially: bracket, then refine with secant or something else.
-
-
-
-//         }
-
-//         // Variables
-//         std::string output_file;
-//         // NB: Store zero sets as vectors of points (vector of vectors)
-//         //     so that this is generalizable to ND problems.
-//         std::vector<std::vector<mp_type> > Zero_set,Bracket_left_set,Bracket_right_set;
-//         std::vector<std::vector<mp_type> > Ndomain, surface;
-//         std::vector<double> Zero_set_trunc;
-//         size_t N_dim;
+        // operator overloads
+        void operator()(mp_type (*f)(mp_type,mp_type)){
+            // Here we want to use the domain and number of dimensions to
+            // apply to a function and root find if we can.
+            // essentially: bracket, then refine with secant or newton .
 
 
 
+        }
 
-//     private:
-//         // Private functions
-//         void Construct_file_stream();
-//         void compute_surface(mp_type (*f)(mp_type,mp_type));
-//         void bracket_roots(mp_type (*f)(mp_type,mp_type));
+        // Variables
+        std::string output_file;
+        // NB: Store zero sets as vectors of points (vector of vectors)
+        //     so that this is generalizable to ND problems.
+        std::vector<std::vector<mp_type> > Zero_set,Bracket_left_set,Bracket_right_set;
+        std::vector<std::vector<mp_type> > Ndomain, surface;
+        std::vector<double> Zero_set_trunc;
+        size_t N_dim;
 
-//         // Private variables
-//         std::ofstream output_stream;
+        // The type of function we want to evaluate the roots on.
+        // i.e. f: R^2 -> R
+        boost::function<mp_type (mp_type x, mp_type y)> f;
+
+        // Data transformation functions, i.e. transforming one variable to another
+        boost::function<mp_type (mp_type x, mp_type y)> g;
 
 
 
-// };
+    private:
+        // Private functions
+        void Construct_file_stream();
+        void compute_surface(mp_type (*f)(mp_type,mp_type));
+        void bracket_roots(mp_type (*f)(mp_type,mp_type));
 
-// void ZeroSetFinder::compute_surface() {
-//     // Taking the domain inputs, create a N-Dim array of the functions values
-//     std::vector<mp_type> Frame_line;
-//     // Loop for surface frames. Compute f(x,y) at each x,y in grid.
-//     for (size_t i = 0; i < Ndomain[0].size(); i++) {
-//         // Naive parallelization. Maybe update this block?
-//         // #pragma omp parallel for schedule(static)
-//         for (size_t j = 0; j < Ndomain[1].size(); j++) {
-//             // Figure[i][j] = f(z_grid[i],eta_grid[j]);  
-//             Frame_line.push_back(f(Ndomain[0][i],Ndomain[1][j]));
-//         }
-//         surface.push_back(Frame_line);
-//         Frame_line.clear();
-// }
+        // Private variables
+        std::ofstream output_stream;
+
+
+
+};
+

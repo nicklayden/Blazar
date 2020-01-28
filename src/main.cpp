@@ -42,7 +42,7 @@ typedef mp::mpfr_float_100 mp_type; // faster compile time
 // Preprocessor defines
 #define PI M_PIl
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::ofstream& outfile);
+void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename);
 std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp_type));
 std::vector<std::vector<double> > read_file(std::ifstream& input);
 
@@ -149,19 +149,39 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < 10; i++)
     {
         r_init_conds.push_back(r_exact(file_input[0][i],file_input[1][i]));
-        std::cout << file_input[0][i] << " " << file_input[1][i] << " " << r_init_conds[i] << std::endl;
+        // std::cout << file_input[0][i] << " " << file_input[1][i] << " " << r_init_conds[i] << std::endl;
         data_slice.push_back(file_input[0][i]);
         data_slice.push_back(r_init_conds[i]);
         initial_data.push_back(data_slice);
         data_slice.clear();
     }
-    mp_type r0 = 0.7;
-    mp_type rn = 0.8;
-    mp_type kn = 1.05;
-    std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
-    std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
-    // compute_and_save_zero_set(alan_theta,time_example1,alan_roots);
+
+    mp_type z_init, z_end, eta_init, eta_end, eta_current;
+    size_t z_n, eta_n;
+    std::vector<std::vector<mp_type> > domain;
+    // grid definitions:
+    z_init = M_PI/4. - 0.1;
+    z_end = M_PI/4. + 0.1;
+    eta_init = 0.9;
+    eta_end = 1.1;
+    z_n = 50;
+    eta_n = 50;
+
+    // Create mesh grids:
+    z_grid = create_grid(z_init,z_end,z_n);
+    eta_grid = create_grid(eta_init, eta_end, eta_n);
+
+    ZeroSetFinder alan_f_zeros(alan_f,domain);
+
+    // mp_type r0 = 0.7;
+    // mp_type rn = 0.8;
+    // mp_type kn = 1.05;
+    // std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
+    // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
+
+    compute_and_save_zero_set(alan_f,time_example1,"alan_f.dat");
+    compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
@@ -298,12 +318,15 @@ int main(int argc, char** argv) {
 }
 
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::ofstream& outfile) {
+void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename) {
     // Input functions: f = parameterization of R
     //                  g = function from (z,eta)-> (t)
     // Mesh in (z,eta) space
     std::vector<mp_type> z_grid, eta_grid;
     std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set;
+    std::ofstream outfile;
+    outfile.open(filename);
+
     auto start_time = std::chrono::high_resolution_clock::now();
    
 
@@ -319,10 +342,10 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     // eta_end  = 2*PI - 1e-4;
     z_init = M_PI/4. - 0.1;
     z_end = M_PI/4. + 0.1;
-    eta_init = 1.01;
-    eta_end = 1.5;
-    z_n = 150;
-    eta_n = 150;
+    eta_init = 0.9;
+    eta_end = 1.1;
+    z_n = 50;
+    eta_n = 50;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -354,6 +377,10 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
 
     auto current_time = std::chrono::high_resolution_clock::now();
     std::cout << "Writing results to file" << std::endl;
+    std::cout << "X domain: [" << z_init << "," << z_end << "]\n";
+    std::cout << "Y domain: [" << eta_init << "," << eta_end << "]\n";
+    std::cout << "Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
+    std::cout << "Roots found: " << zero_set[0].size() << std::endl;
     std::cout << "Time to compute zero set: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
     // output resulting set to file
     matrix_to_file(zero_zt_set,outfile);
@@ -372,12 +399,12 @@ std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp
     size_t z_n, eta_n;
 
     // grid definitions:
-    z_init = 0.;// + 1e-4;
-    z_end = 5.0;// - 1e-4;
-    eta_init = 0;// + 1e-4;
-    eta_end  = 2*PI;// - 1e-4;
-    z_n = 500;
-    eta_n = 500;
+    z_init = M_PI/4. - 0.1;
+    z_end = M_PI/4. + 0.1;
+    eta_init = 1.01;
+    eta_end = 1.5;
+    z_n = 150;
+    eta_n = 150;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -394,6 +421,8 @@ std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp
 
     zero_zt_set.push_back(zero_set[0]);
     zero_zt_set.push_back(zero_set[1]);
+
+
     // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
     // std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
     // for (size_t i = 0; i < zero_set[0].size(); i++)
