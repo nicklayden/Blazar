@@ -99,7 +99,9 @@ inline mp_type alan_theta(mp_type r, mp_type k) {
     return alan_f(r,k) + alan_f_Gr(r,k);
 }
 
-
+inline mp_type alan_ar_test(mp_type r, mp_type k) {
+    return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
+}
 
 
 
@@ -117,7 +119,7 @@ int main(int argc, char** argv) {
     std::ofstream eta_bang_f,eta_crunch_f;
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
-
+    
     // eta_bang_f.open("eta_bang.dat");
     // eta_crunch_f.open("eta_crunch.dat");
 
@@ -141,8 +143,11 @@ int main(int argc, char** argv) {
      * 
      * Solving the exact system at t=0 for example 1
     */
-    std::vector<std::vector<mp_type> > init_conds_zeta, initial_data;
+    std::vector<std::vector<mp_type> > init_conds_zeta, initial_data, domain;
     std::vector<mp_type> r_init_conds, data_slice;
+
+    std::cout << "function: " << alan_ar_test(M_PI/4.,1.0) << std::endl;
+
 
     // init_conds = compute_zero_set_func(eta_eq);
 
@@ -159,20 +164,24 @@ int main(int argc, char** argv) {
 
     mp_type z_init, z_end, eta_init, eta_end, eta_current;
     size_t z_n, eta_n;
-    std::vector<std::vector<mp_type> > domain;
+    std::vector<mp_type> z_grid,eta_grid;
+    std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
     z_init = M_PI/4. - 0.1;
     z_end = M_PI/4. + 0.1;
     eta_init = 0.9;
     eta_end = 1.1;
-    z_n = 50;
-    eta_n = 50;
+    z_n = 500;
+    eta_n = 5;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
     eta_grid = create_grid(eta_init, eta_end, eta_n);
 
-    ZeroSetFinder alan_f_zeros(alan_f,domain);
+    coarse_domain.push_back(z_grid);
+    coarse_domain.push_back(eta_grid);
+
+    // ZeroSetFinder alan_f_zeros(alan_f,coarse_domain);
 
     // mp_type r0 = 0.7;
     // mp_type rn = 0.8;
@@ -180,8 +189,8 @@ int main(int argc, char** argv) {
     // std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
     // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
-    compute_and_save_zero_set(alan_f,time_example1,"alan_f.dat");
-    compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
+    compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
+    // compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
@@ -344,8 +353,8 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     z_end = M_PI/4. + 0.1;
     eta_init = 0.9;
     eta_end = 1.1;
-    z_n = 50;
-    eta_n = 50;
+    z_n = 200;
+    eta_n = 20;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -355,11 +364,18 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     // compute the surfaces
     surface_ze = compute_surface(f,z_grid,eta_grid);
 
+    // for (int i = 0; i < surface_ze.size(); ++i)
+    // {
+    //     std::cout << z_grid[i] << " " << surface_ze[i][0] << std::endl;
+
+    // }
+
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
     bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
+    std::cout << "bracket size: " << bracketing_set[0].size() << std::endl;
     // compute the zeros
-    zero_set = compute_zero_set(f,bracketing_set,5);
+    zero_set = compute_zero_set(f,bracketing_set,2);
 
     zero_zt_set.push_back(zero_set[0]);
     zero_zt_set.push_back(zero_set[1]);
@@ -417,7 +433,7 @@ std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp
     // bracket the roots of the surface
     bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
     // compute the zeros
-    zero_set = compute_zero_set(f,bracketing_set,5);
+    zero_set = compute_zero_set(f,bracketing_set,2);
 
     zero_zt_set.push_back(zero_set[0]);
     zero_zt_set.push_back(zero_set[1]);
