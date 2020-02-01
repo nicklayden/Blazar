@@ -192,8 +192,8 @@ int main(int argc, char** argv) {
     // std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
     // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
-    compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
-    // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
+    // compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
+    compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
     // compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
 
 
@@ -353,16 +353,16 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     size_t z_n, eta_n;
 
     // grid definitions:
-    z_init = -2.;// + 1e-4;
-    z_end = 2.;// - 1e-4;
-    eta_init = -2.;// + 1e-4;
-    eta_end  = 2.;
-    // z_init = M_PI/4. - 0.1;
-    // z_end = M_PI/4. + 0.1;
-    // eta_init = 0.9;
-    // eta_end = 1.1;
-    z_n = 185;
-    eta_n = 185;
+    // z_init = -2.;// + 1e-4;
+    // z_end = 2.;// - 1e-4;
+    // eta_init = -2.;// + 1e-4;
+    // eta_end  = 2.;
+    z_init = M_PI/4. - 0.1;
+    z_end = M_PI/4. + 0.1;
+    eta_init = 0.9;
+    eta_end = 1.1;
+    z_n = 10;
+    eta_n = 2000;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
