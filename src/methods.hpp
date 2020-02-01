@@ -158,34 +158,39 @@ std::vector<std::vector<T> > bracket_roots_2(std::vector<std::vector<T> > surfac
 template <class T> 
 std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std::vector<T> etagrid) {
     // Use a naive method to bracket N roots in the domain
-
+    // Note: This method may miss roots if the root is a constant value
+    //       along one of the grid lines.
     size_t Nz = zgrid.size();
     size_t Ne = etagrid.size();
-    T dz = abs((zgrid[Nz-1] - zgrid[0])/Nz);
-    std::cout << "dz= " << dz << std::endl;
-
+    T dz = (zgrid[Nz-1] - zgrid[0])/Nz;
     T bl, br;
     std::vector<T> zleft_set,zright_set;
     std::vector<T> eleft_set,eright_set;
     std::vector<std::vector<T> > result;
     
-    bl = zgrid[0];
+    // bl = zgrid[0];
 
     for (int i = 0; i < etagrid.size(); ++i)
     {
-        for (int j = 1; j < zgrid.size(); ++j)
+        bl= zgrid[0];
+        for (int j = 1; j < zgrid.size()-1; ++j)
         {
             br = zgrid[j];
-            if (!isnan(f(bl,etagrid[i])))
+            if (!isnan(f(bl,etagrid[i])) && !isnan(f(br,etagrid[i])))
             {
                 if (f(bl,etagrid[i])*f(br,etagrid[i]) < 0)
                 {
-                    zleft_set.push_back(bl);
+                    // if f_(j) brackets with f_0, then 
+                    // f_(j-1) is also a bracket with f_(j) 
+                    // move the next bracket to start at f_(j) on the left
+                    // then continue f_(j+1) on the right and determine crossing.
+                    zleft_set.push_back(br-1.1*dz);
                     zright_set.push_back(br);
                     eleft_set.push_back(etagrid[i]);
                     eright_set.push_back(etagrid[i]);
                     // break;
                     bl = zgrid[j];    
+                    // std::cout << bl << std::endl; 
                 }       
             }
         }
@@ -199,8 +204,18 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
     return result;
 }
 
+template <class T>
+std::vector<std::vector<T> > radial_bracket(T (*f)(T,T), std::vector<T> zgrid, std::vector<T> etagrid) {
+    /* Idea here:
+        Take a function f(x,y) on a square grid in cartesion coordinates.
+        take radial lines g(r,theta) and fix theta, then bracket the intersection
+        between f and g. 
+        Go through a full domain theta = [0,2pi].
+        store the roots as x,y.
+    
 
-
+    */
+}
 
 
 

@@ -103,7 +103,10 @@ inline mp_type alan_ar_test(mp_type r, mp_type k) {
     return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
 }
 
-
+inline mp_type test_paraboloid(mp_type x, mp_type y) {
+    // roots are the circle x^2 + y^2 = 1
+    return x*x + y*y - 1;
+}
 
 
 int main(int argc, char** argv) {
@@ -189,8 +192,13 @@ int main(int argc, char** argv) {
     // std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
     // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
-    compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
-    compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
+    compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
+    // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
+    // compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
+
+
+
+
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
@@ -345,16 +353,16 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     size_t z_n, eta_n;
 
     // grid definitions:
-    // z_init = 0.;// + 1e-4;
-    // z_end = 5.0;// - 1e-4;
-    // eta_init = 0;// + 1e-4;
-    // eta_end  = 2*PI - 1e-4;
-    z_init = M_PI/4. - 0.1;
-    z_end = M_PI/4. + 0.1;
-    eta_init = 0.9;
-    eta_end = 1.1;
-    z_n = 50;
-    eta_n = 200;
+    z_init = -2.;// + 1e-4;
+    z_end = 2.;// - 1e-4;
+    eta_init = -2.;// + 1e-4;
+    eta_end  = 2.;
+    // z_init = M_PI/4. - 0.1;
+    // z_end = M_PI/4. + 0.1;
+    // eta_init = 0.9;
+    // eta_end = 1.1;
+    z_n = 185;
+    eta_n = 185;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -376,7 +384,7 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
     std::cout << "bracket size: " << test[0].size() << std::endl;
     // compute the zeros
-    zero_set = compute_zero_set(f,test,6);
+    zero_set = compute_zero_set(f,test,3);
 
     zero_zt_set.push_back(zero_set[0]);
     zero_zt_set.push_back(zero_set[1]);
