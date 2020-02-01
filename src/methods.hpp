@@ -52,9 +52,9 @@ void matrix_to_file2(std::vector<std::vector<std::vector<T> > > matrix, std::ofs
 
 template <class T>
 void matrix_to_file(std::vector<std::vector<T> > matrix, std::ofstream& ofile) {
-    for (size_t i = 0; i < matrix.size(); i++) {
-        for (size_t j = 0; j < matrix[i].size(); j++) {
-            ofile << matrix[i][j] << " "; 
+    for (size_t i = 0; i < matrix[0].size(); i++) {
+        for (size_t j = 0; j < matrix.size(); j++) {
+            ofile << matrix[j][i] << " "; 
         }
         ofile << "\n";
     }
@@ -79,6 +79,11 @@ std::vector<std::vector<T> > compute_zero_set(T (*f)(T,T),std::vector<std::vecto
 
     result.push_back(z_zero);
     result.push_back(eta_zero);
+    // return the bracketing set too:
+    for (int i = 0; i < bracket.size(); ++i)
+    {
+        result.push_back(bracket[i]);
+    }
     return result;
 }
 
@@ -91,8 +96,8 @@ std::vector<std::vector<T> > bracket_roots(std::vector<std::vector<T> > surface,
 
     for (size_t i = 0; i < eta_grid.size(); ++i) {
         for (size_t j = 0; j < z_grid.size(); ++j) {
-            if (j >2 && j < z_grid.size()-2) {
-                if (surface[j-2][i]*surface[j][i] <= 0) {
+            if (j > 2 && j < z_grid.size()) {
+                if (surface[j-2][i]*surface[j][i] < 0) {
                     bl_z.push_back(z_grid[j-2]);
                     bl_eta.push_back(eta_grid[i]);
                     br_z.push_back(z_grid[j]);
@@ -126,7 +131,7 @@ std::vector<std::vector<T> > bracket_roots_2(std::vector<std::vector<T> > surfac
     {
         // Scan through each eta=const slice and find the sign changes
         // relative to the first element, if it isnt nan
-        for (int j = 0; j < count; ++j)
+        for (int j = 0; j < z_grid.size(); ++j)
         {
             // Check if bracket_point_left is nan:
             if (!isnan(bracket_point_left))
@@ -139,19 +144,60 @@ std::vector<std::vector<T> > bracket_roots_2(std::vector<std::vector<T> > surfac
                     bl_z.push_back(bracket_point_left);
                     bl_eta.push_back(eta_grid[j]);
                     br_z.push_back(bracket_point_right);
-                    br_eta.push_back()
-                    goto endloop;
+                    br_eta.push_back();
                 }
             }
         }
-        endloop:
 
     }
 
-
-
 }
 
+
+
+template <class T> 
+std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std::vector<T> etagrid) {
+    // Use a naive method to bracket N roots in the domain
+
+    size_t Nz = zgrid.size();
+    size_t Ne = etagrid.size();
+    T dz = abs((zgrid[Nz-1] - zgrid[0])/Nz);
+    std::cout << "dz= " << dz << std::endl;
+
+    T bl, br;
+    std::vector<T> zleft_set,zright_set;
+    std::vector<T> eleft_set,eright_set;
+    std::vector<std::vector<T> > result;
+    
+    bl = zgrid[0];
+
+    for (int i = 0; i < etagrid.size(); ++i)
+    {
+        for (int j = 1; j < zgrid.size(); ++j)
+        {
+            br = zgrid[j];
+            if (!isnan(f(bl,etagrid[i])))
+            {
+                if (f(bl,etagrid[i])*f(br,etagrid[i]) < 0)
+                {
+                    zleft_set.push_back(bl);
+                    zright_set.push_back(br);
+                    eleft_set.push_back(etagrid[i]);
+                    eright_set.push_back(etagrid[i]);
+                    // break;
+                    bl = zgrid[j];    
+                }       
+            }
+        }
+    }
+
+    result.push_back(zleft_set);
+    result.push_back(eleft_set);
+    result.push_back(zright_set);
+    result.push_back(eright_set);
+
+    return result;
+}
 
 
 

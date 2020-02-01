@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
     // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
     compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
-    // compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
+    compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
     // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
@@ -332,7 +332,7 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     //                  g = function from (z,eta)-> (t)
     // Mesh in (z,eta) space
     std::vector<mp_type> z_grid, eta_grid;
-    std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set;
+    std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set,test;
     std::ofstream outfile;
     outfile.open(filename);
 
@@ -353,8 +353,8 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     z_end = M_PI/4. + 0.1;
     eta_init = 0.9;
     eta_end = 1.1;
-    z_n = 200;
-    eta_n = 20;
+    z_n = 50;
+    eta_n = 200;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -369,13 +369,14 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     //     std::cout << z_grid[i] << " " << surface_ze[i][0] << std::endl;
 
     // }
-
+    
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
-    bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
-    std::cout << "bracket size: " << bracketing_set[0].size() << std::endl;
+    test = slow_bracket(f,z_grid,eta_grid);
+    // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
+    std::cout << "bracket size: " << test[0].size() << std::endl;
     // compute the zeros
-    zero_set = compute_zero_set(f,bracketing_set,2);
+    zero_set = compute_zero_set(f,test,6);
 
     zero_zt_set.push_back(zero_set[0]);
     zero_zt_set.push_back(zero_set[1]);
@@ -392,14 +393,22 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
 
 
     auto current_time = std::chrono::high_resolution_clock::now();
-    std::cout << "Writing results to file" << std::endl;
-    std::cout << "X domain: [" << z_init << "," << z_end << "]\n";
-    std::cout << "Y domain: [" << eta_init << "," << eta_end << "]\n";
-    std::cout << "Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
-    std::cout << "Roots found: " << zero_set[0].size() << std::endl;
-    std::cout << "Time to compute zero set: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
+    std::cout << "# Writing results to file" << std::endl;
+    std::cout << "# X domain: [" << z_init << "," << z_end << "]\n";
+    std::cout << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
+    std::cout << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
+    std::cout << "# Roots found: " << zero_set[0].size() << std::endl;
+    std::cout << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
+    
+    outfile << "# Writing results to file" << std::endl;
+    outfile << "# X domain: [" << z_init << "," << z_end << "]\n";
+    outfile << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
+    outfile << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
+    outfile << "# Roots found: " << zero_set[0].size() << std::endl;
+    outfile << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
+    outfile << "# Data Column layout: {r_0,z_0,r_bl,z_bl,r_br,z_br}\n";
     // output resulting set to file
-    matrix_to_file(zero_zt_set,outfile);
+    matrix_to_file(zero_set,outfile);
 
 }
 
