@@ -26,7 +26,12 @@ T steffensen(T (*f)(T,T), T x0, T x1, T eta, size_t iter) {
 
 template <class T>
 T secant(T (*f)(T,T), T x0, T x1, T eta, size_t iter) {
-    // 4 iterations of the secant method.
+    // N iterations of the secant method.
+    /*
+        F: R2 -> R is curried along the second dimension and the root is refined
+        given a proper bracket.        
+    */
+
     T xr;
     std::vector<T> roots;
     roots.push_back(x0);
@@ -39,6 +44,27 @@ T secant(T (*f)(T,T), T x0, T x1, T eta, size_t iter) {
 
     return roots[iter];
 }
+
+
+
+template <class T>
+T secant2(T (*f)(T,T), T x, T e0, T e1, size_t iter) {
+    // Secant method as above but function is curried in the first dimension.
+    T er;
+    std::vector<T> roots;
+    roots.push_back(e0);
+    roots.push_back(e1);
+
+    for (size_t i = 0; i < iter; i++) {
+        er = roots[i+1] - f(x,roots[i+1])*(roots[i+1]-roots[i])/(f(x,roots[i+1]) - f(x,roots[i]));
+        roots.push_back(er);
+    }
+
+    return roots[iter];
+}
+
+
+
 
 template <class T>
 void matrix_to_file2(std::vector<std::vector<std::vector<T> > > matrix, std::ofstream& ofile) {
@@ -69,6 +95,7 @@ void vector_to_file(std::vector<T> vector, std::ofstream& ofile) {
 
 template <class T>
 std::vector<std::vector<T> > compute_zero_set(T (*f)(T,T),std::vector<std::vector<T> > bracket, size_t secant_N){
+
     std::vector<T> z_zero, eta_zero, time_zero;
     std::vector<std::vector<T> > result;
     
@@ -77,6 +104,14 @@ std::vector<std::vector<T> > compute_zero_set(T (*f)(T,T),std::vector<std::vecto
         eta_zero.push_back(bracket[1][i]);
     }
 
+    // Add in the zeros from the other dimension!
+    // for (int i = 0; i < bracket[1].size(); ++i)
+    // {
+    //     /* code */
+    // }
+
+
+
     result.push_back(z_zero);
     result.push_back(eta_zero);
     // return the bracketing set too:
@@ -84,6 +119,9 @@ std::vector<std::vector<T> > compute_zero_set(T (*f)(T,T),std::vector<std::vecto
     {
         result.push_back(bracket[i]);
     }
+
+
+
     return result;
 }
 
@@ -160,9 +198,12 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
     // Use a naive method to bracket N roots in the domain
     // Note: This method may miss roots if the root is a constant value
     //       along one of the grid lines.
+    // BIG NOTE:
+    //  Should do this from both directions and combine the zero sets together.
     size_t Nz = zgrid.size();
     size_t Ne = etagrid.size();
     T dz = (zgrid[Nz-1] - zgrid[0])/Nz;
+    T deta = (etagrid[Ne-1] - etagrid[0])/Ne;
     T bl, br;
     std::vector<T> zleft_set,zright_set;
     std::vector<T> eleft_set,eright_set;
@@ -188,9 +229,7 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
                     zright_set.push_back(br);
                     eleft_set.push_back(etagrid[i]);
                     eright_set.push_back(etagrid[i]);
-                    // break;
                     bl = zgrid[j];    
-                    // std::cout << bl << std::endl; 
                 }       
             }
         }
@@ -200,6 +239,41 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
     result.push_back(eleft_set);
     result.push_back(zright_set);
     result.push_back(eright_set);
+
+    zleft_set.clear();
+    eleft_set.clear();
+    zright_set.clear();
+    eright_set.clear();
+
+    // Root find from the other grid direction, use a staggered grid
+    // so that we arent overlapping the same roots.
+
+    // bl = etagrid[0];
+    // for (int i = 0; i < zgrid.size(); ++i)
+    // {
+    //     for (int j = 1; j < etagrid.size()-1; ++j)
+    //     {
+    //         br = etagrid[j];
+    //         if (!isnan(f(zgrid[i],bl)) && !isnan(f(zgrid[i],br)))
+    //         {
+    //             if (f(zgrid[i],bl)*f(zgrid[i],br) < 0)
+    //             {
+    //                 std::cout << bl << " " << br << std::endl;
+    //                 zleft_set.push_back(zgrid[i]);
+    //                 zright_set.push_back(zgrid[i]);
+    //                 eleft_set.push_back(br - 1.1*deta);
+    //                 eright_set.push_back(br);
+    //                 bl = etagrid[j];
+
+    //             }
+    //         }
+    //     }
+    // }
+
+    // result.push_back(zleft_set);
+    // result.push_back(eleft_set);
+    // result.push_back(zright_set);
+    // result.push_back(eright_set);
 
     return result;
 }
