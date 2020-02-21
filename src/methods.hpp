@@ -52,8 +52,8 @@ T secant2(T (*f)(T,T), T x, T e0, T e1, size_t iter) {
     // Secant method as above but function is curried in the first dimension.
     T er;
     std::vector<T> roots;
-    roots.push_back(e0);
     roots.push_back(e1);
+    roots.push_back(e0);
 
     for (size_t i = 0; i < iter; i++) {
         er = roots[i+1] - f(x,roots[i+1])*(roots[i+1]-roots[i])/(f(x,roots[i+1]) - f(x,roots[i]));
@@ -194,12 +194,13 @@ std::vector<std::vector<T> > bracket_roots_2(std::vector<std::vector<T> > surfac
 
 
 template <class T> 
-std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std::vector<T> etagrid) {
+std::vector<std::vector<T> > bracket_secant_method(T (*f)(T,T), std::vector<T> zgrid, std::vector<T> etagrid, size_t secant_N) {
     // Use a naive method to bracket N roots in the domain
     // Note: This method may miss roots if the root is a constant value
     //       along one of the grid lines.
     // BIG NOTE:
     //  Should do this from both directions and combine the zero sets together.
+    size_t Nroots;
     size_t Nz = zgrid.size();
     size_t Ne = etagrid.size();
     T dz = (zgrid[Nz-1] - zgrid[0])/Nz;
@@ -208,9 +209,11 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
     std::vector<T> zleft_set,zright_set;
     std::vector<T> eleft_set,eright_set;
     std::vector<std::vector<T> > result;
-    
-    // bl = zgrid[0];
+    std::vector<T> roots;
+    std::vector<T> z_zero,eta_zero;
 
+    // Bracketing along the z direction first. i.e. eta is fixed, r is determined.
+    std::cout << "First bracketing direction" << std::endl;
     for (int i = 0; i < etagrid.size(); ++i)
     {
         bl= zgrid[0];
@@ -234,46 +237,61 @@ std::vector<std::vector<T> > slow_bracket(T (*f)(T,T), std::vector<T> zgrid, std
             }
         }
     }
+    // Nroots = 0;
+    Nroots = zleft_set.size();
+    // Refine each bracket along this dimension with the secant method:
+    for (size_t i = 0; i < zleft_set.size(); i++) {
+        z_zero.push_back(secant(f,zleft_set[i],zright_set[i], eleft_set[i],secant_N));
+        eta_zero.push_back(eleft_set[i]);
+    }
 
+
+
+    std::cout << "Switching bracketing direction" << std::endl;
+    // Root find from the other grid direction, use a staggered grid
+    // so that we arent overlapping the same roots.
+    // z is fixed, eta is determined.
+
+    
+    for (int i = 0; i < zgrid.size(); ++i)
+    {
+        bl = etagrid[0];
+        for (int j = 1; j < etagrid.size()-1; ++j)
+        {
+            br = etagrid[j];
+            if (!isnan(f(zgrid[i],bl)) && !isnan(f(zgrid[i],br)))
+            {
+                if (f(zgrid[i],bl)*f(zgrid[i],br) < 0)
+                {
+                    zleft_set.push_back(zgrid[i]);
+                    zright_set.push_back(zgrid[i]);
+                    eleft_set.push_back(br - 1.1*deta);
+                    eright_set.push_back(br);
+                    bl = etagrid[j];
+
+                }
+            }
+        }
+    }
+    
+    for (size_t i = Nroots; i < zleft_set.size(); i++) {
+        eta_zero.push_back(secant2(f,zleft_set[i],eleft_set[i], eright_set[i],secant_N));
+        z_zero.push_back(zleft_set[i]);
+    }
+
+    std::cout << "Found " << Nroots << " roots along z. And " << zleft_set.size() - Nroots << " roots along eta.\n";
+
+
+
+    // Save the roots
+    result.push_back(z_zero);
+    result.push_back(eta_zero);
+
+    // Save the bracketing set 
     result.push_back(zleft_set);
     result.push_back(eleft_set);
     result.push_back(zright_set);
     result.push_back(eright_set);
-
-    zleft_set.clear();
-    eleft_set.clear();
-    zright_set.clear();
-    eright_set.clear();
-
-    // Root find from the other grid direction, use a staggered grid
-    // so that we arent overlapping the same roots.
-
-    // bl = etagrid[0];
-    // for (int i = 0; i < zgrid.size(); ++i)
-    // {
-    //     for (int j = 1; j < etagrid.size()-1; ++j)
-    //     {
-    //         br = etagrid[j];
-    //         if (!isnan(f(zgrid[i],bl)) && !isnan(f(zgrid[i],br)))
-    //         {
-    //             if (f(zgrid[i],bl)*f(zgrid[i],br) < 0)
-    //             {
-    //                 std::cout << bl << " " << br << std::endl;
-    //                 zleft_set.push_back(zgrid[i]);
-    //                 zright_set.push_back(zgrid[i]);
-    //                 eleft_set.push_back(br - 1.1*deta);
-    //                 eright_set.push_back(br);
-    //                 bl = etagrid[j];
-
-    //             }
-    //         }
-    //     }
-    // }
-
-    // result.push_back(zleft_set);
-    // result.push_back(eleft_set);
-    // result.push_back(zright_set);
-    // result.push_back(eright_set);
 
     return result;
 }

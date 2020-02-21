@@ -62,7 +62,7 @@ inline mp_type alan_f(mp_type r, mp_type k) {
     g = 1./cos(r);
     h = tan(r);
 
-    return e*(  f*a + k*b + g*( h*c + k*d )  );
+    return e*(  f*a + k*b) + g*( h*c + k*d )  ;
 }
 
 
@@ -85,19 +85,24 @@ inline mp_type alan_f_Gr(mp_type r, mp_type k) {
     // Depends on alan_f_A for calculating A(r2)
     mp_type a,b,c,d,r2;
 
-    a = sqrt(2)*cos(r);
-    b = sqrt(1- 0.5*sin(r)*sin(r));
+    a = sqrt(2.)*cos(r);
+    b = sqrt(1. - 0.5*sin(r)*sin(r));
     c = a/b;
-    r2 = acos((-1/sqrt(2))*sin(r));
+    r2 = acos(sin(r)*(-1/sqrt(2.)));
 
     d = alan_f_A(r2,k);
     return c*d;
 }
 
+inline mp_type alan_const_k(mp_type r, mp_type k) {
+    return alan_f_A(r,1.0);
+}
+
+
 inline mp_type alan_theta(mp_type r, mp_type k) {
     // Alan's function sqrt(theta) = F,r + G,r
     // Depends on alan_f_Gr, alan_f
-    return alan_f(r,k) + alan_f_Gr(r,k);
+    return alan_f_A(r,k) + alan_f_Gr(r,k);
 }
 
 inline mp_type alan_ar_test(mp_type r, mp_type k) {
@@ -106,7 +111,7 @@ inline mp_type alan_ar_test(mp_type r, mp_type k) {
 
 inline mp_type test_paraboloid(mp_type x, mp_type y) {
     // roots are the circle x^2 + y^2 = 1
-    return x*x + y*y - 1;
+    return x*x + y*y - 1.0;
 }
 
 inline mp_type plane(mp_type x, mp_type y) {
@@ -130,7 +135,7 @@ inline mp_type plane_para_ellipse(mp_type x, mp_type y) {
 }
 
 inline mp_type wave_pattern(mp_type x, mp_type y) {
-    return sin(x)*cos(y) - 0.5;
+    return sin(x)*cos(y) - 0.;
 }
 
 int main(int argc, char** argv) {
@@ -173,7 +178,6 @@ int main(int argc, char** argv) {
     std::vector<std::vector<mp_type> > init_conds_zeta, initial_data, domain;
     std::vector<mp_type> r_init_conds, data_slice;
 
-    std::cout << "function: " << alan_ar_test(M_PI/4.,1.0) << std::endl;
 
 
     // init_conds = compute_zero_set_func(eta_eq);
@@ -194,10 +198,10 @@ int main(int argc, char** argv) {
     std::vector<mp_type> z_grid,eta_grid;
     std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
-    z_init = M_PI/4. - 0.1;
-    z_end = M_PI/4. + 0.1;
-    eta_init = 0.9;
-    eta_end = 1.1;
+    z_init = -5;
+    z_end = 5;
+    eta_init = 0.55;
+    eta_end = 0.75;
     z_n = 500;
     eta_n = 5;
 
@@ -217,14 +221,14 @@ int main(int argc, char** argv) {
     // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
 
     // compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
-    // compute_and_save_zero_set(wave_pattern,time_example1,"para2.dat");
+    // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
     // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
-    compute_and_save_zero_set(alan_theta,time_example1,"alantheta.dat");
+    // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
+
+    compute_and_save_zero_set(alan_const_k,time_example1,"alan_f.dat");
 
 
-
-
-    // compute_and_save_zero_set(eta_bang,time_example1,eta_bang_f);
+    // compute_and_save_zero_set(eta_bang,time_example1,"eta_bang_f.dat");
     // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
     // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
 
@@ -378,16 +382,16 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     size_t z_n, eta_n;
 
     // grid definitions:
-    // z_init = -10;// + 1e-4;
-    // z_end = 10;// - 1e-4;
-    // eta_init = -10;// + 1e-4;
-    // eta_end  = 10;
-    z_init = M_PI/4. - 0.1;
-    z_end = M_PI/4. + 0.1;
-    eta_init = 0.9;
+    // z_init = 1e-4;// + 1e-4;
+    // z_end = 1-1e-4;// - 1e-4;
+    // eta_init = 1e-4;// + 1e-4;
+    // eta_end  = PI-1e-4;
+    z_init = 0.5;
+    z_end = 3.;
+    eta_init = 0.55;
     eta_end = 1.1;
-    z_n = 15;
-    eta_n = 1500;
+    z_n = 100;
+    eta_n = 2;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -395,7 +399,7 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
 
     std::cout << "Computing surface \n";
     // compute the surfaces
-    surface_ze = compute_surface(f,z_grid,eta_grid);
+    // surface_ze = compute_surface(f,z_grid,eta_grid);
 
     // for (int i = 0; i < surface_ze.size(); ++i)
     // {
@@ -405,14 +409,14 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
-    test = slow_bracket(f,z_grid,eta_grid);
+    zero_set = bracket_secant_method(f,z_grid,eta_grid,4);
     // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
-    std::cout << "bracket size: " << test[0].size() << std::endl;
+    // std::cout << "bracket size: " << test[0].size() << std::endl;
     // compute the zeros
-    zero_set = compute_zero_set(f,test,3);
+    // zero_set = compute_zero_set(f,test,3);
 
-    zero_zt_set.push_back(zero_set[0]);
-    zero_zt_set.push_back(zero_set[1]);
+    // zero_zt_set.push_back(zero_set[0]);
+    // zero_zt_set.push_back(zero_set[1]);
     // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
     std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
     // for (size_t i = 0; i < zero_set[0].size(); i++)
@@ -464,14 +468,14 @@ void compute_and_save_zero_set2(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_t
     size_t z_n, eta_n;
 
     // grid definitions:
-    z_init = -10;// + 1e-4;
-    z_end = 10;// - 1e-4;
-    eta_init = -10;// + 1e-4;
-    eta_end  = 10;
-    // z_init = M_PI/4. - 0.1;
-    // z_end = M_PI/4. + 0.1;
-    // eta_init = 0.9;
-    // eta_end = 1.1;
+    // z_init = -10;// + 1e-4;
+    // z_end = 10;// - 1e-4;
+    // eta_init = -10;// + 1e-4;
+    // eta_end  = 10;
+    z_init = M_PI/4. - 0.1;
+    z_end = M_PI/4. + 0.1;
+    eta_init = 0.9;
+    eta_end = 1.1;
     z_n = 150;
     eta_n = 150;
 
@@ -491,14 +495,14 @@ void compute_and_save_zero_set2(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_t
     
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
-    test = slow_bracket(f,z_grid,eta_grid);
+    zero_set = bracket_secant_method(f,z_grid,eta_grid,10);
     // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
     std::cout << "bracket size: " << test[0].size() << std::endl;
     // compute the zeros
-    zero_set = compute_zero_set(f,test,3);
+    // zero_set = compute_zero_set(f,test,3);
 
-    zero_zt_set.push_back(zero_set[0]);
-    zero_zt_set.push_back(zero_set[1]);
+
+
     // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
     std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
     // for (size_t i = 0; i < zero_set[0].size(); i++)
