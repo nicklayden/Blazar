@@ -16,6 +16,7 @@
 #include <fstream>
 #include <complex>
 #include <chrono>
+#include <limits>
 // #include <gmpxx.h>
 
 // Boost libraries
@@ -32,6 +33,7 @@
 #include "methods.hpp"
 #include "invariants.hpp"
 #include "odes.hpp"
+#include "testfunctions.hpp"
 
 // Type definitions
 // typedef boost::multiprecision::cpp_dec_float_50 mp_type;
@@ -42,9 +44,7 @@ typedef mp::mpfr_float_100 mp_type; // faster compile time
 // Preprocessor defines
 #define PI M_PIl
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename);
-void compute_and_save_zero_set2(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename);
-std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp_type));
+void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::vector<mp_type> > domain, std::string filename);
 std::vector<std::vector<double> > read_file(std::ifstream& input);
 
 
@@ -126,45 +126,18 @@ inline mp_type plane(mp_type x, mp_type y) {
     return (d - a*x - b*y)/c;
 }
 
-inline mp_type paraboloid(mp_type x, mp_type y) {
-    return x*x + y*y;
-}
-
-inline mp_type plane_para_ellipse(mp_type x, mp_type y) {
-    return paraboloid(x,y) - plane(x,y);
-}
-
-inline mp_type wave_pattern(mp_type x, mp_type y) {
-    return sin(x)*cos(y) - 0.;
-}
 
 int main(int argc, char** argv) {
-    // Set multiprecision digits
-    // std::setprecision(std::numeric_limits<mp_type>::max_digits10);
-    // mpf_set_default_prec(50);
 
     // input file streams
     std::ifstream r_init("R_init.dat");
 
     // output file streams
-    std::ofstream rhop_f,rhom_f,psim_f,psip_f,app_et_f,app_ct_f,e1_R,rho_ex1_f,mu_ex1_f,eta_set_ex1,test_num_sol,test2;
+    std::ofstream test_num_sol,test2;
     std::ofstream eta_bang_f,eta_crunch_f;
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
     
-    // eta_bang_f.open("eta_bang.dat");
-    // eta_crunch_f.open("eta_crunch.dat");
-
-    // rhop_f.open("rhop.dat");
-    // rhom_f.open("rhom.dat");
-    // psim_f.open("psim.dat");
-    // psip_f.open("psip.dat");
-    // app_et_f.open("app_et.dat");
-    // app_ct_f.open("app_ct.dat");
-    // e1_R.open("e1_R.dat");
-    // rho_ex1_f.open("rho_ex1.dat");
-    // mu_ex1_f.open("mu_ex1.dat");
-    // eta_set_ex1.open("eta_set_ex1.dat");
     std::vector<std::vector<double> > file_input;
     file_input = read_file(r_init);
 
@@ -200,10 +173,10 @@ int main(int argc, char** argv) {
     // grid definitions:
     z_init = -5;
     z_end = 5;
-    eta_init = 0.55;
-    eta_end = 0.75;
-    z_n = 500;
-    eta_n = 5;
+    eta_init = -5;
+    eta_end = 5;
+    z_n = 100;
+    eta_n = 100;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -212,25 +185,12 @@ int main(int argc, char** argv) {
     coarse_domain.push_back(z_grid);
     coarse_domain.push_back(eta_grid);
 
-    // ZeroSetFinder alan_f_zeros(alan_f,coarse_domain);
-
-    // mp_type r0 = 0.7;
-    // mp_type rn = 0.8;
-    // mp_type kn = 1.05;
-    // std::cout << "pi/4= " << M_PIl/4.0 << std::endl;
-    // std::cout << secant(alan_f,r0,rn,kn,(size_t)8) << std::endl;
-
     // compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
     // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
     // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
 
-    compute_and_save_zero_set(alan_const_k,time_example1,"alan_f.dat");
-
-
-    // compute_and_save_zero_set(eta_bang,time_example1,"eta_bang_f.dat");
-    // compute_and_save_zero_set(eta_crunch,time_example1,eta_crunch_f);    
-    // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
+    compute_and_save_zero_set(gaussian,coarse_domain,"alan_f.dat");
 
 
     // /**
@@ -349,98 +309,37 @@ int main(int argc, char** argv) {
     // }
     
 
-
-    // compute_and_save_zero_set(mu_example1,time_example1,mu_ex1_f);
-    // compute_and_save_zero_set(R_example1,time_example1,e1_R);
-    // compute_and_save_zero_set(eta_eq,time_example1,eta_set_ex1);
-    // compute_and_save_zero_set(rho_ex1,time_example1,rho_ex1_f);
-    // compute_and_save_zero_set(psim,ct_function,psim_f);
-    // compute_and_save_zero_set(psip,et_function,psip_f);
-    // compute_and_save_zero_set(app_horizon,ct_function,app_ct_f);
-    // compute_and_save_zero_set(app_horizon,et_function,app_et_f);
-    // compute_and_save_zero_set(rhom,ct_function,rhom_f); // note: rhom not defined yet
-    // compute_and_save_zero_set(rhop,et_function,rhop_f);
-
-}
+} // End Main
 
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename) {
-    // Input functions: f = parameterization of R
-    //                  g = function from (z,eta)-> (t)
+void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::vector<mp_type> > domain, std::string filename) {
+    // Input function: f = parameterization of R
+    // Input domain: 2xN vector of meshgrid on which to compute the zero set.                 
     // Mesh in (z,eta) space
-    std::vector<mp_type> z_grid, eta_grid;
-    std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set,test;
+    std::vector<std::vector<mp_type> > zero_set;
     std::ofstream outfile;
     outfile.open(filename);
 
+    // Measuring compute time for the root finder.
     auto start_time = std::chrono::high_resolution_clock::now();
-   
 
-   
-    // Mesh parameters, limits / number of points on grid
-    mp_type z_init, z_end, eta_init, eta_end, eta_current;
-    size_t z_n, eta_n;
-
-    // grid definitions:
-    // z_init = 1e-4;// + 1e-4;
-    // z_end = 1-1e-4;// - 1e-4;
-    // eta_init = 1e-4;// + 1e-4;
-    // eta_end  = PI-1e-4;
-    z_init = 0.5;
-    z_end = 3.;
-    eta_init = 0.55;
-    eta_end = 1.1;
-    z_n = 100;
-    eta_n = 2;
-
-    // Create mesh grids:
-    z_grid = create_grid(z_init,z_end,z_n);
-    eta_grid = create_grid(eta_init, eta_end, eta_n);
-
-    std::cout << "Computing surface \n";
-    // compute the surfaces
-    // surface_ze = compute_surface(f,z_grid,eta_grid);
-
-    // for (int i = 0; i < surface_ze.size(); ++i)
-    // {
-    //     std::cout << z_grid[i] << " " << surface_ze[i][0] << std::endl;
-
-    // }
-    
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
-    zero_set = bracket_secant_method(f,z_grid,eta_grid,4);
-    // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
-    // std::cout << "bracket size: " << test[0].size() << std::endl;
-    // compute the zeros
-    // zero_set = compute_zero_set(f,test,3);
-
-    // zero_zt_set.push_back(zero_set[0]);
-    // zero_zt_set.push_back(zero_set[1]);
-    // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
-    std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
-    // for (size_t i = 0; i < zero_set[0].size(); i++)
-    // {
-    //     zero_zt_set[0][i] = zero_zt_set[0][i];
-    //     // zero_zt_set[1][i] = g(zero_set[0][i],zero_set[1][i]);
-    //     zero_zt_set[1][i] = zero_set[1][i]; // This leaves the coord system alone and DOESNT TRANSFORM!
-    //     // std::cout << zero_zt_set[0][i] << " " << zero_zt_set[1][i] << std::endl;
-    // }
-    
+    zero_set = bracket_secant_method(f,domain[0],domain[1],4);
 
 
     auto current_time = std::chrono::high_resolution_clock::now();
     std::cout << "# Writing results to file" << std::endl;
-    std::cout << "# X domain: [" << z_init << "," << z_end << "]\n";
-    std::cout << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
-    std::cout << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
+    std::cout << "# X domain: [" << domain[0][0] << "," << domain[0][domain[0].size()-1] << "]\n";
+    std::cout << "# Y domain: [" << domain[1][0] << "," << domain[1][domain[1].size()-1] << "]\n";
+    std::cout << "# Grid size (X x Y): " << domain[0].size() << " x " << domain[1].size() << std::endl;
     std::cout << "# Roots found: " << zero_set[0].size() << std::endl;
     std::cout << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
     
     outfile << "# Writing results to file" << std::endl;
-    outfile << "# X domain: [" << z_init << "," << z_end << "]\n";
-    outfile << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
-    outfile << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
+    outfile << "# X domain: [" << domain[0][0] << "," << domain[0][domain[0].size()-1] << "]\n";
+    outfile << "# Y domain: [" << domain[1][0] << "," << domain[1][domain[1].size()-1] << "]\n";
+    outfile << "# Grid size (X x Y): " << domain[0].size() << " x " << domain[1].size() << std::endl;
     outfile << "# Roots found: " << zero_set[0].size() << std::endl;
     outfile << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
     outfile << "# Data Column layout: {r_0,z_0,r_bl,z_bl,r_br,z_br}\n";
@@ -448,142 +347,6 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_ty
     matrix_to_file(zero_set,outfile);
 
 }
-
-
-void compute_and_save_zero_set2(mp_type (*f)(mp_type,mp_type), mp_type (*g)(mp_type, mp_type), std::string filename) {
-    // Input functions: f = parameterization of R
-    //                  g = function from (z,eta)-> (t)
-    // Mesh in (z,eta) space
-    std::vector<mp_type> z_grid, eta_grid;
-    std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set,test;
-    std::ofstream outfile;
-    outfile.open(filename);
-
-    auto start_time = std::chrono::high_resolution_clock::now();
-   
-
-   
-    // Mesh parameters, limits / number of points on grid
-    mp_type z_init, z_end, eta_init, eta_end, eta_current;
-    size_t z_n, eta_n;
-
-    // grid definitions:
-    // z_init = -10;// + 1e-4;
-    // z_end = 10;// - 1e-4;
-    // eta_init = -10;// + 1e-4;
-    // eta_end  = 10;
-    z_init = M_PI/4. - 0.1;
-    z_end = M_PI/4. + 0.1;
-    eta_init = 0.9;
-    eta_end = 1.1;
-    z_n = 150;
-    eta_n = 150;
-
-    // Create mesh grids:
-    eta_grid = create_grid(z_init,z_end,z_n);
-    z_grid = create_grid(eta_init, eta_end, eta_n);
-
-    std::cout << "Computing surface \n";
-    // compute the surfaces
-    surface_ze = compute_surface(f,z_grid,eta_grid);
-
-    // for (int i = 0; i < surface_ze.size(); ++i)
-    // {
-    //     std::cout << z_grid[i] << " " << surface_ze[i][0] << std::endl;
-
-    // }
-    
-    std::cout << "Bracketing roots \n";
-    // bracket the roots of the surface
-    zero_set = bracket_secant_method(f,z_grid,eta_grid,10);
-    // bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
-    std::cout << "bracket size: " << test[0].size() << std::endl;
-    // compute the zeros
-    // zero_set = compute_zero_set(f,test,3);
-
-
-
-    // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
-    std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
-    // for (size_t i = 0; i < zero_set[0].size(); i++)
-    // {
-    //     zero_zt_set[0][i] = zero_zt_set[0][i];
-    //     // zero_zt_set[1][i] = g(zero_set[0][i],zero_set[1][i]);
-    //     zero_zt_set[1][i] = zero_set[1][i]; // This leaves the coord system alone and DOESNT TRANSFORM!
-    //     // std::cout << zero_zt_set[0][i] << " " << zero_zt_set[1][i] << std::endl;
-    // }
-    
-
-
-    auto current_time = std::chrono::high_resolution_clock::now();
-    std::cout << "# Writing results to file" << std::endl;
-    std::cout << "# X domain: [" << z_init << "," << z_end << "]\n";
-    std::cout << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
-    std::cout << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
-    std::cout << "# Roots found: " << zero_set[0].size() << std::endl;
-    std::cout << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
-    
-    outfile << "# Writing results to file" << std::endl;
-    outfile << "# X domain: [" << z_init << "," << z_end << "]\n";
-    outfile << "# Y domain: [" << eta_init << "," << eta_end << "]\n";
-    outfile << "# Grid size (X x Y): " << z_n << " x " << eta_n << std::endl;
-    outfile << "# Roots found: " << zero_set[0].size() << std::endl;
-    outfile << "# Compute time: " << std::chrono::duration_cast<std::chrono::milliseconds>((current_time - start_time)).count() << " ms" << std::endl;
-    outfile << "# Data Column layout: {r_0,z_0,r_bl,z_bl,r_br,z_br}\n";
-    // output resulting set to file
-    matrix_to_file(zero_set,outfile);
-
-}
-
-std::vector<std::vector<mp_type> > compute_zero_set_func(mp_type (*f)(mp_type,mp_type)) {
-    // Input functions: f = parameterization of R
-    //                  g = function from (z,eta)-> (t)
-    // Mesh in (z,eta) space
-    std::vector<mp_type> z_grid, eta_grid;
-    std::vector<std::vector<mp_type> > surface_ze, bracketing_set, zero_set, zero_zt_set;
-
-    // Mesh parameters, limits / number of points on grid
-    mp_type z_init, z_end, eta_init, eta_end, eta_current;
-    size_t z_n, eta_n;
-
-    // grid definitions:
-    z_init = M_PI/4. - 0.1;
-    z_end = M_PI/4. + 0.1;
-    eta_init = 1.01;
-    eta_end = 1.5;
-    z_n = 150;
-    eta_n = 150;
-
-    // Create mesh grids:
-    z_grid = create_grid(z_init,z_end,z_n);
-    eta_grid = create_grid(eta_init, eta_end, eta_n);
-
-
-    // compute the surfaces
-    surface_ze = compute_surface(f,z_grid,eta_grid);
-
-    // bracket the roots of the surface
-    bracketing_set = bracket_roots(surface_ze,z_grid,eta_grid);
-    // compute the zeros
-    zero_set = compute_zero_set(f,bracketing_set,2);
-
-    zero_zt_set.push_back(zero_set[0]);
-    zero_zt_set.push_back(zero_set[1]);
-
-
-    // Transforming from (z,eta) -> (z,t) coordinates (OR NOT - REDO FUNCTION)
-    // std::cout << "NOTE: NOT TRANSFORMING RESULTING DATA" << std::endl;
-    // for (size_t i = 0; i < zero_set[0].size(); i++)
-    // {
-    //     zero_zt_set[0][i] = zero_zt_set[0][i];
-    //     // zero_zt_set[1][i] = g(zero_set[0][i],zero_set[1][i]);
-    //     zero_zt_set[1][i] = zero_set[1][i]; // This leaves the coord system alone and DOESNT TRANSFORM!
-    //     // std::cout << zero_zt_set[0][i] << " " << zero_zt_set[1][i] << std::endl;
-    // }
-    return zero_zt_set;
-}
-
-
 
 
 std::vector<std::vector<double> > read_file(std::ifstream& input) {

@@ -6,7 +6,7 @@ cxx = g++
 program = run
 
 # source files
-srcs = main.cpp invariants.cpp
+srcs = main.cpp invariants.cpp testfunctions.cpp
 
 # directory to sources and compiled obj files
 srcdir = src

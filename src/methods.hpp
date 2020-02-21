@@ -80,7 +80,7 @@ template <class T>
 void matrix_to_file(std::vector<std::vector<T> > matrix, std::ofstream& ofile) {
     for (size_t i = 0; i < matrix[0].size(); i++) {
         for (size_t j = 0; j < matrix.size(); j++) {
-            ofile << matrix[j][i] << " "; 
+            ofile << std::setprecision(100) << matrix[j][i] << " "; 
         }
         ofile << "\n";
     }
