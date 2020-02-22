@@ -61,4 +61,60 @@ class ode_e1 {
 };
 
 
+/** 
+ * EXAMPLE 2: Primordial Black Hole Formation
+ *
+ * Initial conditions retrieved from numerically solving the exact solution at t=0
+ * Big bang time tB(z) = 0 for this problem.
+*/
+
+class ode_e2 {
+    public: 
+        ode_e2(double z, bool signflag): m_z(z),m_f(signflag) {};
+        double m_z;
+        bool m_f;
+        void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
+            double R,Lambda;
+            R = xin[0];
+            Lambda=1.0;
+            // z values are independent of each other. so the solution will be evolved for each z.
+            // The value being integrated here is R.
+            
+            // Positive root
+            if(m_f) { 
+            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R );//+ Lambda*R*R/3.);
+            } else { 
+            // Negative root
+            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R );//+ Lambda*R*R/3.);         
+            }
+
+        }
+
+        double E(double z) {
+            double a,b,c,d;
+            double rc,rw;
+            int n1, n2;
+            rc = 10.0;
+            rw = 1.0;
+            n1 = 8;
+            n2 = 10;
+
+
+            a = -0.5*pow(z/rc,2);
+            b = pow(z/rw,n1);
+            c = pow(z/rw,n2);
+            d = pow(1 + b - 2*c,4);
+
+            return a*d;
+        }
+
+
+
+        double M(double z) {
+            // M = z^3/2   Jhinghan paper
+            return z*z*z/2.;
+        }
+
+
+};
 

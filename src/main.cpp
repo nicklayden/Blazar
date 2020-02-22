@@ -126,6 +126,37 @@ inline mp_type plane(mp_type x, mp_type y) {
     return (d - a*x - b*y)/c;
 }
 
+inline mp_type energy_e2(mp_type z) {
+    mp_type a,b,c,d;
+    mp_type rc,rw;
+    int n1, n2;
+    rc = 10.0;
+    rw = 1.0;
+    n1 = 8;
+    n2 = 10;
+
+    a = -0.5*pow(z/rc,2);
+    b = pow(z/rw,n1);
+    c = pow(z/rw,n2);
+    d = pow(1 + b - 2*c,4);
+
+    return a*d;
+}
+
+inline mp_type mass_e2(double z) {
+    return pow(z,3)/2.;
+}
+
+inline mp_type example2_eta_set(mp_type z, mp_type eta) {
+    return eta - sin(eta) + 10*pow(-2*energy_e2(z),3./2.)/mass_e2(z) ;
+}
+
+inline mp_type example2_Rmax(mp_type z) {
+    // Start the areal radii at their max value so we can evovle the contracting phase (negative root ODE)
+    return -mass_e2(z)/energy_e2(z);
+}
+
+
 
 int main(int argc, char** argv) {
 
@@ -171,12 +202,12 @@ int main(int argc, char** argv) {
     std::vector<mp_type> z_grid,eta_grid;
     std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
-    z_init = -5;
-    z_end = 5;
-    eta_init = -5;
-    eta_end = 5;
-    z_n = 100;
-    eta_n = 100;
+    z_init = 0 + 1e-4;
+    z_end = 1;
+    eta_init = 0 + 1e-4;
+    eta_end = 2*M_PIl - 1e-4;
+    z_n = 50;
+    eta_n = 500;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -190,123 +221,124 @@ int main(int argc, char** argv) {
     // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
 
-    compute_and_save_zero_set(gaussian,coarse_domain,"alan_f.dat");
+    // compute_and_save_zero_set(gaussian,coarse_domain,"alan_f.dat");
 
 
-    // /**
-    //  * ODE INTEGRATION
-    //  * 
-    //  * First for Example 1 in Szekeres Paper
-    //  * 
-    // */
-    // // Integration method
-    // boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
-    // // Solution containers
-    // std::vector<double> r_curve(1);
-    // std::vector<double> t_sol;
-    // std::vector<std::vector<double> > R_sol, full_sol_transformed;
-    // std::vector<std::vector<std::vector<double> > > full_solution;
-    // // Initial Conditions
-    // double t_start = 0;
-    // double t_end = 18;
-    // double dt = 0.001;
-    // // int kk = 483;
-    // // Integrate through all z, each solution is unique for each z.
-    // for (size_t i = 0; i < file_input.size(); i++)
-    // {
-    //     // Set initial conditions for R and z.
-    //     r_curve[0] = file_input[i][1];
-    //     // std::cout << r_curve[0] << std::endl;
-    //     ode_e1 solution_curve(file_input[i][0],false);
-    //     boost::numeric::odeint::integrate_const(stepper,solution_curve, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
-    //     // The above line gives a solution curve for a single z value. We need to iterate
-    //     // through the grid of z values to complete the curve.
-    //     // NOTE: Need to scroll through solution curves and remove all NAN values.
-    //     full_solution.push_back(R_sol);
-    //     R_sol.clear();
-
-    // }
-    
-    // std::cout << full_solution[0][1][0] << isnan(full_solution[0][1][0]) <<  std::endl;
-    // if (!isnan(full_solution[0][0][0]))
-    // {
-    //     std::cout << full_solution[0][0][0] << std::endl;   
-    // }
-
-    // // Removing the NaN values from the solution curve vectors.    
-    // full_sol_transformed = removeNAN(full_solution);
-
-    // // lbracket,rbracket is R(z) for either side of the root
-    // // zbracket, tbracket are the corresponding z and t values for the lbracket
-    // std::vector<double> lbracket,rbracket, zbracket, tbracket;
-    // double lvalue,rvalue;
-    // // Bracketing the solution sections to determine the solution for R=2M
-    // for (size_t i = 0; i < full_sol_transformed.size(); i++) {
-    //     if (full_sol_transformed[i].size() > 1) {
-    //         for (size_t j = 1; j < full_sol_transformed[i].size(); j++) {
-    //             lvalue = full_sol_transformed[i][j-1] - 2.* file_input[i][0];
-    //             rvalue = full_sol_transformed[i][j] - 2.* file_input[i][0];
-    //             if (lvalue*rvalue < 0.) {
-    //                 lbracket.push_back(full_sol_transformed[i][j-1]);
-    //                 rbracket.push_back(full_sol_transformed[i][j]);
-    //                 zbracket.push_back(file_input[i][0]);
-    //                 tbracket.push_back(t_sol[j]);
-    //             }
-    //         }
-    //     }
-    // }
-    
-    // // std::cout << lbracket.size() << " " << rbracket.size() << " " << zbracket.size() << " " << tbracket.size() << std::endl;
-
-
-    // // for (size_t i = 0; i < lbracket.size(); i++)
-    // // {
-    // //     std::cout << lbracket[i] << " " << rbracket[i] << " " << zbracket[i] << " " << tbracket[i] << " " << std::endl;
-    // // }
-    
-
-    // matrix_to_file(full_sol_transformed,test2);
-
-    // // for ( size_t i = 0; i < 30; i++) { 
-    // //     for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {
-    // //         std::cout << full_sol_transformed[i][j] << " ";
-    // //     }
-    // //     std::cout << std::endl;
-    // // }
-
-    // std::cout << full_sol_transformed.size() << " " << full_sol_transformed[0].size() << " " << full_sol_transformed[100].size() << std::endl;
-
-
-    // std::cout << full_solution.size() << " " << full_solution[0].size() << std::endl;
-
-    // // matrix_to_file2(full_solution,test_num_sol);
-
-    // // for (size_t i = 0; i < R_sol.size(); i++)
-    // // {
-    // //     std::cout << R_sol[i][0] << " " << R_sol[i][0] - 2.*file_input[kk][0] << " " << t_sol[i] <<  std::endl;
-    // //     // for (size_t j = 0; j < R_sol[0].size(); j++)
-    // //     // {
-    // //     //     std::cout << R_sol[i][0] << " ";
-    // //     // }
-    // //     // std::cout << std::endl;
+    /**
+     * ODE INTEGRATION
+     * 
+     * First for Example 1 in Szekeres Paper
+     * 
+    */
+    // Integration method
+    boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
+    // Solution containers
+    std::vector<double> r_curve(1);
+    std::vector<double> t_sol;
+    std::vector<std::vector<double> > R_sol, full_sol_transformed;
+    std::vector<std::vector<std::vector<double> > > full_solution;
+    // Initial Conditions
+    double t_start = 0;
+    double t_end = 18;
+    double dt = 0.001;
+    // int kk = 483;
+    // Integrate through all z, each solution is unique for each z.
+    for (size_t i = 0; i < file_input.size(); i++)
+    {
+        // Set initial conditions for R and z.
+        r_curve[0] = file_input[i][1];
         
-    // // }
+        // std::cout << r_curve[0] << std::endl;
+        ode_e1 solution_curve(file_input[i][0],false);
+        boost::numeric::odeint::integrate_const(stepper,solution_curve, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        // The above line gives a solution curve for a single z value. We need to iterate
+        // through the grid of z values to complete the curve.
+        // NOTE: Need to scroll through solution curves and remove all NAN values.
+        full_solution.push_back(R_sol);
+        R_sol.clear();
+
+    }
+    
+    std::cout << full_solution[0][1][0] << isnan(full_solution[0][1][0]) <<  std::endl;
+    if (!isnan(full_solution[0][0][0]))
+    {
+        std::cout << full_solution[0][0][0] << std::endl;   
+    }
+
+    // Removing the NaN values from the solution curve vectors.    
+    full_sol_transformed = removeNAN(full_solution);
+
+    // lbracket,rbracket is R(z) for either side of the root
+    // zbracket, tbracket are the corresponding z and t values for the lbracket
+    std::vector<double> lbracket,rbracket, zbracket, tbracket;
+    double lvalue,rvalue;
+    // Bracketing the solution sections to determine the solution for R=2M
+    for (size_t i = 0; i < full_sol_transformed.size(); i++) {
+        if (full_sol_transformed[i].size() > 1) {
+            for (size_t j = 1; j < full_sol_transformed[i].size(); j++) {
+                lvalue = full_sol_transformed[i][j-1] - 2.* file_input[i][0];
+                rvalue = full_sol_transformed[i][j] - 2.* file_input[i][0];
+                if (lvalue*rvalue < 0.) {
+                    lbracket.push_back(full_sol_transformed[i][j-1]);
+                    rbracket.push_back(full_sol_transformed[i][j]);
+                    zbracket.push_back(file_input[i][0]);
+                    tbracket.push_back(t_sol[j]);
+                }
+            }
+        }
+    }
+    
+    // std::cout << lbracket.size() << " " << rbracket.size() << " " << zbracket.size() << " " << tbracket.size() << std::endl;
+
+
+    // for (size_t i = 0; i < lbracket.size(); i++)
+    // {
+    //     std::cout << lbracket[i] << " " << rbracket[i] << " " << zbracket[i] << " " << tbracket[i] << " " << std::endl;
+    // }
     
 
+    matrix_to_file(full_sol_transformed,test2);
 
-
-
-
-
-
-    // for (size_t i = 0; i < file_input.size(); i++)
-    // {
-    //     for (size_t j = 0; j < file_input[0].size(); j++)
-    //     {
-    //         std::cout << file_input[i][j] << " ";
+    // for ( size_t i = 0; i < 30; i++) { 
+    //     for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {
+    //         std::cout << full_sol_transformed[i][j] << " ";
     //     }
     //     std::cout << std::endl;
     // }
+
+    std::cout << full_sol_transformed.size() << " " << full_sol_transformed[0].size() << " " << full_sol_transformed[100].size() << std::endl;
+
+
+    std::cout << full_solution.size() << " " << full_solution[0].size() << std::endl;
+
+    // matrix_to_file2(full_solution,test_num_sol);
+
+    // for (size_t i = 0; i < R_sol.size(); i++)
+    // {
+    //     std::cout << R_sol[i][0] << " " << R_sol[i][0] - 2.*file_input[kk][0] << " " << t_sol[i] <<  std::endl;
+    //     // for (size_t j = 0; j < R_sol[0].size(); j++)
+    //     // {
+    //     //     std::cout << R_sol[i][0] << " ";
+    //     // }
+    //     // std::cout << std::endl;
+        
+    // }
+    
+
+
+
+
+
+
+
+    for (size_t i = 0; i < file_input.size(); i++)
+    {
+        for (size_t j = 0; j < file_input[0].size(); j++)
+        {
+            std::cout << file_input[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
     
 
 } // End Main
@@ -325,7 +357,7 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::v
 
     std::cout << "Bracketing roots \n";
     // bracket the roots of the surface
-    zero_set = bracket_secant_method(f,domain[0],domain[1],4);
+    zero_set = bracket_secant_method(f,domain[0],domain[1],6);
 
 
     auto current_time = std::chrono::high_resolution_clock::now();
