@@ -32,15 +32,17 @@ from mpl_toolkits import mplot3d
 # ax.plot3D(all_curves[100],np.arange(0,len(all_curves[100]),1))
 # plt.show()
 
-time = np.arange(0,20,0.001)
-init = np.genfromtxt("R_init.dat")
+time = np.arange(0,1000,0.01)
+init = np.genfromtxt("z_out.dat")
+# init = np.linspace(1e-4, 1,50 )
 print(len(init))
-surf = open("test2.dat",'r')
+surf = open("test.dat",'r')
 surf_d = []
 for line in surf:
     # line.split()
     surf_d.append([line])
 
+print(len(surf_d))
 horz_r = []
 horz_t = []
 # fig = plt.subplots(111)
@@ -49,7 +51,7 @@ for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     # print(len(slice))
     try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i-1,0]))
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
     except:
         continue
     # if len(slice) > 1:
@@ -63,17 +65,17 @@ for i in range(len(surf_d)):
     #     slice[j] -= 2.0*init(j)
     # print(slice_)
     # print(time[0:len(slice_)])
-lambda_ = 10.    
+lambda_ = 0.001    
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     if len(slice) > 1:
         for j in range(len(slice) - 1):
-            lhs = lambda_*(slice[j]**3) - 6*init[i,0] - 3*slice[j]
-            rhs = lambda_*(slice[j+1]**3) - 6*init[i,0] - 3*slice[j+1]
+            lhs = lambda_*(slice[j]**3) - 6*init[i] - 3*slice[j]
+            rhs = lambda_*(slice[j+1]**3) - 6*init[i] - 3*slice[j+1]
             if (lhs * rhs) < 0 :
-                if init[i,0] > 0.11:
+                if init[i] > 0.11:
                     # horz_r.append(slice[j])
-                    horz_r.append(init[i,0])
+                    horz_r.append(init[i])
                     horz_t.append(time[j])
                     # plt.scatter(time[j],slice[j],c='k',marker=',')
 

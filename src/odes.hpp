@@ -70,22 +70,22 @@ class ode_e1 {
 
 class ode_e2 {
     public: 
-        ode_e2(double z, bool signflag): m_z(z),m_f(signflag) {};
-        double m_z;
+        ode_e2(double z, double lambda,  bool signflag): m_z(z),m_l(lambda),m_f(signflag) {};
+        double m_z,m_l;
         bool m_f;
+
         void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
-            double R,Lambda;
+            double R;
             R = xin[0];
-            Lambda=1.0;
             // z values are independent of each other. so the solution will be evolved for each z.
             // The value being integrated here is R.
             
             // Positive root
             if(m_f) { 
-            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R );//+ Lambda*R*R/3.);
+            dxdt[0] = sqrt(2*E(m_z) + 2*m_z/R  + m_l*R*R/3.);
             } else { 
             // Negative root
-            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R );//+ Lambda*R*R/3.);         
+            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R + m_l*R*R/3.);
             }
 
         }
