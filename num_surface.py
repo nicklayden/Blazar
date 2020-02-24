@@ -8,7 +8,8 @@ from mpl_toolkits import mplot3d
 # t_vals = np.arange(0,18,0.01)
 # single_curve = []
 # all_curves = []
-
+def M(z):
+    return (z**3)/2.
 
 # data2 = []
 # infile = open("test2.dat","r")
@@ -36,7 +37,7 @@ time = np.arange(0,1000,0.01)
 init = np.genfromtxt("z_out.dat")
 # init = np.linspace(1e-4, 1,50 )
 print(len(init))
-surf = open("test.dat",'r')
+surf = open("test2.dat",'r')
 surf_d = []
 for line in surf:
     # line.split()
@@ -50,10 +51,10 @@ horz_t = []
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     # print(len(slice))
-    try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
-    except:
-        continue
+    # try:
+    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
+    # except:
+    #     continue
     # if len(slice) > 1:
     #     for j in range(len(slice) - 1):
     #         lhs = slice[j] - 2*init[i,0] 
@@ -70,8 +71,8 @@ for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     if len(slice) > 1:
         for j in range(len(slice) - 1):
-            lhs = lambda_*(slice[j]**3) - 6*init[i] - 3*slice[j]
-            rhs = lambda_*(slice[j+1]**3) - 6*init[i] - 3*slice[j+1]
+            lhs = lambda_*(slice[j]**3) - 6*M(init[i]) - 3*slice[j]
+            rhs = lambda_*(slice[j+1]**3) - 6*M(init[i]) - 3*slice[j+1]
             if (lhs * rhs) < 0 :
                 if init[i] > 0.11:
                     # horz_r.append(slice[j])
@@ -80,7 +81,7 @@ for i in range(len(surf_d)):
                     # plt.scatter(time[j],slice[j],c='k',marker=',')
 
 
-plt.plot(horz_t,horz_r,lw=3.0,c='r',label="R=2M")
+plt.plot(horz_t,horz_r,lw=3.0,c='r',label="Geometric Horizon")
 
 
 plt.grid(True)
