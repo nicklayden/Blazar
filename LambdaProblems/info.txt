@@ -1,2 +1,0 @@
-lambda0-xx.png images are made using a timestep of 0.001 and with double
-precision truncated initial conditions.
