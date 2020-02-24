@@ -51,11 +51,13 @@ std::vector<std::vector<double> > read_file(std::ifstream& input);
 inline mp_type alan_f(mp_type r, mp_type k) {
     // Alans specific prob. Just wanted a graph showing the function
     // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
+
+    // NOte: Function is likely written incorrectly in paper.
     mp_type a,b,c,d,e,f,g,h;
-    a = sinh(k*(M_PI - r) + sinh(k*r));
-    b = cosh(k*(M_PI - r) - cosh(k*r));
-    c = sinh(k*(M_PI/2. + r) + sinh(k*(M_PI/2. - r)));
-    d = cosh(k*(M_PI/2. + r) - cosh(k*(M_PI/2. - r)));
+    a = sinh(k*(M_PIl - r)) + sinh(k*r);
+    b = cosh(k*(M_PIl - r)) - cosh(k*r);
+    c = sinh(k*(M_PIl/2. + r)) + sinh(k*(M_PIl/2. - r));
+    d = cosh(k*(M_PIl/2. + r)) - cosh(k*(M_PIl/2. - r));
 
     e = -(1./sin(r));
     f = -cos(r)/(sin(r)*sin(r));
@@ -68,7 +70,7 @@ inline mp_type alan_f(mp_type r, mp_type k) {
 
 inline mp_type alan_f_A(mp_type r, mp_type k) {
     // Alans function
-    // THIS IS A(r) 
+    // THIS IS A(r)  -- equation 86/87 in paper
     mp_type a,b,c,d,e,f;
     a = sinh(k*M_PI);
     b = cosh(k*r);
@@ -197,17 +199,17 @@ int main(int argc, char** argv) {
     }
 
     std::ofstream z_out;
-    double z_init, z_end, eta_init, eta_end, eta_current;
+    mp_type z_init, z_end, eta_init, eta_end, eta_current;
     size_t z_n, eta_n;
-    std::vector<double> z_grid,eta_grid;
-    std::vector<std::vector<double> > coarse_domain;
+    std::vector<mp_type> z_grid,eta_grid;
+    std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
-    z_init = 0 + 1e-4;
-    z_end = 1 - 1e-4;
-    eta_init = 0 + 1e-4;
-    eta_end = 2*M_PIl - 1e-4;
-    z_n = 25;
-    eta_n = 500;
+    z_init = M_PIl/4. - 0.1;
+    z_end = M_PIl/4. + 0.1;
+    eta_init = 0.55;
+    eta_end = 1.4;
+    z_n = 50;
+    eta_n = 50;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -215,12 +217,15 @@ int main(int argc, char** argv) {
 
     coarse_domain.push_back(z_grid);
     coarse_domain.push_back(eta_grid);
-    z_out.open("z_out.dat");
-    for (int i = 0; i < z_grid.size(); ++i)
-    {
-        z_out << z_grid[i] << std::endl;
-    }
-    // compute_and_save_zero_set(test_paraboloid,time_example1,"para.dat");
+    // z_out.open("z_out.dat");
+    // for (int i = 0; i < z_grid.size(); ++i)
+    // {
+    //     z_out << z_grid[i] << std::endl;
+    // }
+
+
+
+    compute_and_save_zero_set(alan_theta,coarse_domain,"para.dat");
     // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
     // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
@@ -235,35 +240,35 @@ int main(int argc, char** argv) {
      * 
     */
     // Integration method
-    boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
-    // Solution containers
-    std::vector<double> r_curve(1);
-    std::vector<double> t_sol;
-    std::vector<std::vector<double> > R_sol, full_sol_transformed;
-    std::vector<std::vector<std::vector<double> > > full_solution;
-    // Initial Conditions
-    double t_start = 0;
-    double t_end = 1000;
-    double dt = 0.01;
-    // int kk = 483;
-    double lambda = 0.001;
-    // Integrate through all z, each solution is unique for each z.
-    for (size_t i = 0; i < z_grid.size(); i++)
-    {
-        // Set initial conditions for R and z.
-        // r_curve[0] = file_input[i][1];
-        r_curve[0] = example2_Rmax(z_grid[i]);
+    // boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
+    // // Solution containers
+    // std::vector<double> r_curve(1);
+    // std::vector<double> t_sol;
+    // std::vector<std::vector<double> > R_sol, full_sol_transformed;
+    // std::vector<std::vector<std::vector<double> > > full_solution;
+    // // Initial Conditions
+    // double t_start = 0;
+    // double t_end = 1000;
+    // double dt = 0.01;
+    // // int kk = 483;
+    // double lambda = 0.001;
+    // // Integrate through all z, each solution is unique for each z.
+    // for (size_t i = 0; i < z_grid.size(); i++)
+    // {
+    //     // Set initial conditions for R and z.
+    //     // r_curve[0] = file_input[i][1];
+    //     r_curve[0] = example2_Rmax(z_grid[i]);
         
-        // std::cout << r_curve[0] << std::endl;
-        ode_e2 solution_curve(z_grid[i],lambda,false);
-        boost::numeric::odeint::integrate_const(stepper,solution_curve, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
-        // The above line gives a solution curve for a single z value. We need to iterate
-        // through the grid of z values to complete the curve.
-        // NOTE: Need to scroll through solution curves and remove all NAN values.
-        full_solution.push_back(R_sol);
-        R_sol.clear();
+    //     // std::cout << r_curve[0] << std::endl;
+    //     ode_e2 solution_curve(z_grid[i],lambda,false);
+    //     boost::numeric::odeint::integrate_const(stepper,solution_curve, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+    //     // The above line gives a solution curve for a single z value. We need to iterate
+    //     // through the grid of z values to complete the curve.
+    //     // NOTE: Need to scroll through solution curves and remove all NAN values.
+    //     full_solution.push_back(R_sol);
+    //     R_sol.clear();
 
-    }
+    // }
     // std::cout << "Completed solution curves.\n";
     // std::cout << full_solution[0][1][0] << isnan(full_solution[0][1][0]) <<  std::endl;
     // if (!isnan(full_solution[0][0][0]))
@@ -272,7 +277,7 @@ int main(int argc, char** argv) {
     // }
 
     // Removing the NaN values from the solution curve vectors.    
-    full_sol_transformed = removeNAN(full_solution);
+    // full_sol_transformed = removeNAN(full_solution);
     // std::cout << "Removed NAN values from solution curves.\n";
     
 
@@ -307,12 +312,12 @@ int main(int argc, char** argv) {
 
     // matrix_to_file(full_sol_transformed,test2);
     // std::cout << "Saved solution to file\n";
-    for ( size_t i = 0; i < full_sol_transformed.size(); i++) { 
-        for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {
-            std::cout << full_sol_transformed[i][j] << " ";
-        }
-        std::cout << std::endl;
-    }
+    // for ( size_t i = 0; i < full_sol_transformed.size(); i++) { 
+    //     for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {
+    //         std::cout << full_sol_transformed[i][j] << " ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 
     // std::cout << full_sol_transformed.size() << " " << full_sol_transformed[0].size() << " " << full_sol_transformed[100].size() << std::endl;
 

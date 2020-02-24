@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-data = np.genfromtxt("alan_f.dat")
+data = np.genfromtxt("para.dat")
 # data = np.genfromtxt("alan_f.dat")
 # data3 = np.genfromtxt("para.dat")
 # data4 = np.genfromtxt("eta_bang_f.dat")
