@@ -2,5 +2,5 @@
 obj/
 src/sys/
 test/
-.dat
-.txt
+*.dat
+*.txt
