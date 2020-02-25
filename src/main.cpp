@@ -185,11 +185,14 @@ int main(int argc, char** argv) {
 
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
-    /**
+
+
+
+    /***********************************************************************************
      * DETERMINING INITIAL CONDITIONS FOR INTEGRATION
      * 
      * Solving the exact system at t=0 for example 1
-    */
+    ************************************************************************************/
     std::vector<std::vector<mp_type> > init_conds_zeta, initial_data, domain;
     std::vector<mp_type> r_init_conds, data_slice;
 
@@ -213,11 +216,11 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0.8 + 1e-4;
-    z_end = 0.8 - 1e-4;
+    z_init = 0.1 + 1e-4;
+    z_end = 0.9 - 1e-4;
     eta_init = 0.55;
     eta_end = 1.6;
-    z_n = 1;
+    z_n = 5;
     eta_n = 100;
 
     // Create mesh grids:
@@ -245,7 +248,7 @@ int main(int argc, char** argv) {
     /**
      * ODE INTEGRATION
      * 
-     * First for Example 1 in Szekeres Paper
+     * Solver works on example 1 and example 2, initial conditions must be modified
      * 
     */
     // Integration method
@@ -255,118 +258,36 @@ int main(int argc, char** argv) {
     std::vector<double> t_sol;
     std::vector<std::vector<double> > R_sol, full_sol_transformed;
     std::vector<std::vector<std::vector<double> > > full_solution;
-    // Initial Conditions
+    
+    // Initial Conditions and parameter values
     double t_start = 0;
     double t_end = 1000;
     double dt = 0.01;
+    double lambda = 0.001;
 
-    double lambda = 0.1;
-    // Integrate through all z, each solution is unique for each z.
-    // for (size_t i = 0; i < z_grid.size(); i++)
-    // {
-    int i = 0;
-        // Set initial conditions for R and z.
+    // Looping through all initial conditions to get a series of solution curves in the z space.
+    for (size_t i = 0; i < z_grid.size(); i++)
+    {
+        // Initial conditions for example 1:
         // r_curve[0] = file_input[i][1];
+
+        // Initial conditions for example 2:
         r_curve[0] = example2_Rmax(z_grid[i]);
-        std::cout << z_grid[i] << std::endl;
-        // r_curve[0] = 0;
-        
-        std::cout << r_curve[0] << std::endl;
+
+        // ODE to solve for each initial condition.
         ode_e2 primordial_bh(z_grid[i],lambda,false);
         boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
-        // The above line gives a solution curve for a single z value. We need to iterate
-        // through the grid of z values to complete the curve.
-        // NOTE: Need to scroll through solution curves and remove all NAN values.
-        // std::cout << primordial_bh.mu_sol.size() << std::endl;
         full_solution.push_back(R_sol);
         // std::cout << R_sol[0].size() << std::endl;
-        // R_sol.clear();
+        R_sol.clear();
 
-    // }
-    // std::cout << "Completed solution curves.\n";
-    // std::cout << full_solution[0][1][0] << isnan(full_solution[0][1][0]) <<  std::endl;
-    // if (!isnan(full_solution[0][0][0]))
-    // {
-    //     std::cout << full_solution[0][0][0] << std::endl;   
-    // }
+    }
 
     // Removing the NaN values from the solution curve vectors.    
     full_sol_transformed = removeNAN(full_solution);
-
-    // std::cout << "Removed NAN values from solution curves.\n";
-    
-
-    // lbracket,rbracket is R(z) for either side of the root
-    // zbracket, tbracket are the corresponding z and t values for the lbracket
-    // std::vector<double> lbracket,rbracket, zbracket, tbracket;
-    // double lvalue,rvalue;
-    // // Bracketing the solution sections to determine the solution for R=2M
-    // for (size_t i = 0; i < full_sol_transformed.size(); i++) {
-    //     if (full_sol_transformed[i].size() > 1) {
-    //         for (size_t j = 1; j < full_sol_transformed[i].size(); j++) {
-    //             lvalue = full_sol_transformed[i][j-1] - 2.* file_input[i][0];
-    //             rvalue = full_sol_transformed[i][j] - 2.* file_input[i][0];
-    //             if (lvalue*rvalue < 0.) {
-    //                 lbracket.push_back(full_sol_transformed[i][j-1]);
-    //                 rbracket.push_back(full_sol_transformed[i][j]);
-    //                 zbracket.push_back(file_input[i][0]);
-    //                 tbracket.push_back(t_sol[j]);
-    //             }
-    //         }
-    //     }
-    // }
-    // std::cout << "Bracketed roots of R=2M.\n";
-    // std::cout << lbracket.size() << " " << rbracket.size() << " " << zbracket.size() << " " << tbracket.size() << std::endl;
+    matrix_to_file3(full_sol_transformed,test2);
 
 
-    // for (size_t i = 0; i < lbracket.size(); i++)
-    // {
-    //     std::cout << lbracket[i] << " " << rbracket[i] << " " << zbracket[i] << " " << tbracket[i] << " " << std::endl;
-    // }
-    
-
-    matrix_to_file3(R_sol,test2);
-    // std::cout << "Saved solution to file\n";
-    // for ( size_t i = 0; i < full_sol_transformed.size(); i++) { 
-    //     for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {
-    //         std::cout << full_sol_transformed[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
-
-    // std::cout << full_sol_transformed.size() << " " << full_sol_transformed[0].size() << " " << full_sol_transformed[100].size() << std::endl;
-
-
-    // std::cout << full_solution.size() << " " << full_solution[0].size() << std::endl;
-
-    // matrix_to_file2(full_solution,test_num_sol);
-
-    // for (size_t i = 0; i < R_sol.size(); i++)
-    // {
-    //     std::cout << R_sol[i][0] << " " << R_sol[i][0] - 2.*file_input[kk][0] << " " << t_sol[i] <<  std::endl;
-    //     // for (size_t j = 0; j < R_sol[0].size(); j++)
-    //     // {
-    //     //     std::cout << R_sol[i][0] << " ";
-    //     // }
-    //     // std::cout << std::endl;
-        
-    // }
-    
-
-
-
-
-
-
-
-    // for (size_t i = 0; i < file_input.size(); i++)
-    // {
-    //     for (size_t j = 0; j < file_input[0].size(); j++)
-    //     {
-    //         std::cout << file_input[i][j] << " ";
-    //     }
-    //     std::cout << std::endl;
-    // }
     
 
 } // End Main

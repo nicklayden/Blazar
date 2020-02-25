@@ -66,7 +66,7 @@ for i in range(len(surf_d)):
     #     slice[j] -= 2.0*init(j)
     # print(slice_)
     # print(time[0:len(slice_)])
-lambda_ = 0.001    
+lambda_ = 0.001
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     if len(slice) > 1:

@@ -90,12 +90,12 @@ class ode_e2 {
                 // Negative root
                 dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R + m_l*R*R/3.);
                 // xin[1] = dxdt[0];
-                mu = mu_example2(dxdt[0],R,E(m_z));
-                rho = rho_example2(dxdt[0],R,E(m_z));
+                // mu = mu_example2(dxdt[0],R,E(m_z));
+                // rho = rho_example2(dxdt[0],R,E(m_z));
                 // xin[2] = mu;
                 // xin[3] = rho;
                 // std::cout << mu << std::endl;
-                std::cout << dxdt[0] << " " << R << " " << mu << " " << rho << std::endl;
+                // std::cout << dxdt[0] << " " << R << " " << mu << " " << rho << std::endl;
             }
 
             // full_sol.push_back(dxdt[0]);
