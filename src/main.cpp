@@ -48,6 +48,15 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::v
 std::vector<std::vector<double> > read_file(std::ifstream& input);
 
 
+inline mp_type rho_example2(mp_type rdot, mp_type r, mp_type energy) {
+    // Extended Cartan invariant that detects the horizon
+    mp_type a,b,c,d;
+    a = sqrt(1 + 2*energy);
+    b = rdot - a;
+    c = b/r;
+    return c/sqrt(2.0);
+}
+
 inline mp_type alan_f(mp_type r, mp_type k) {
     // Alans specific prob. Just wanted a graph showing the function
     // crossing f(r,k)=0 for r near pi/4 and k = (1,2)
@@ -154,7 +163,7 @@ inline double example2_eta_set(double z, double eta) {
 }
 
 inline double example2_Rmax(double z) {
-    // Start the areal radii at their max value so we can evovle the contracting phase (negative root ODE)
+    // Start the areal radii at their max value so we can evolve the contracting phase (negative root ODE)
     return -mass_e2(z)/energy_e2(z);
 }
 
@@ -171,8 +180,8 @@ int main(int argc, char** argv) {
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
     
-    std::vector<std::vector<double> > file_input;
-    file_input = read_file(r_init);
+    // std::vector<std::vector<double> > file_input;
+    // file_input = read_file(r_init);
 
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
@@ -188,15 +197,15 @@ int main(int argc, char** argv) {
 
     // init_conds = compute_zero_set_func(eta_eq);
 
-    for (size_t i = 0; i < 10; i++)
-    {
-        r_init_conds.push_back(r_exact(file_input[0][i],file_input[1][i]));
-        // std::cout << file_input[0][i] << " " << file_input[1][i] << " " << r_init_conds[i] << std::endl;
-        data_slice.push_back(file_input[0][i]);
-        data_slice.push_back(r_init_conds[i]);
-        initial_data.push_back(data_slice);
-        data_slice.clear();
-    }
+    // for (size_t i = 0; i < 10; i++)
+    // {
+    //     r_init_conds.push_back(r_exact(file_input[0][i],file_input[1][i]));
+    //     // std::cout << file_input[0][i] << " " << file_input[1][i] << " " << r_init_conds[i] << std::endl;
+    //     data_slice.push_back(file_input[0][i]);
+    //     data_slice.push_back(r_init_conds[i]);
+    //     initial_data.push_back(data_slice);
+    //     data_slice.clear();
+    // }
 
     std::ofstream z_out;
     double z_init, z_end, eta_init, eta_end, eta_current;
@@ -204,12 +213,12 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 1e-4;
-    z_end = 1-1e-4;
+    z_init = 0.8 + 1e-4;
+    z_end = 0.8 - 1e-4;
     eta_init = 0.55;
-    eta_end = 1.4;
-    z_n = 100;
-    eta_n = 50;
+    eta_end = 1.6;
+    z_n = 1;
+    eta_n = 100;
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -217,11 +226,11 @@ int main(int argc, char** argv) {
 
     coarse_domain.push_back(z_grid);
     coarse_domain.push_back(eta_grid);
-    z_out.open("z_out.dat");
-    for (int i = 0; i < z_grid.size(); ++i)
-    {
-        z_out << z_grid[i] << std::endl;
-    }
+    // z_out.open("z_out.dat");
+    // for (int i = 0; i < z_grid.size(); ++i)
+    // {
+    //     z_out << z_grid[i] << std::endl;
+    // }
 
 
 
@@ -250,26 +259,30 @@ int main(int argc, char** argv) {
     double t_start = 0;
     double t_end = 1000;
     double dt = 0.01;
-    // int kk = 483;
-    double lambda = 0.001;
+
+    double lambda = 0.1;
     // Integrate through all z, each solution is unique for each z.
-    for (size_t i = 0; i < z_grid.size(); i++)
-    {
+    // for (size_t i = 0; i < z_grid.size(); i++)
+    // {
+    int i = 0;
         // Set initial conditions for R and z.
         // r_curve[0] = file_input[i][1];
         r_curve[0] = example2_Rmax(z_grid[i]);
+        std::cout << z_grid[i] << std::endl;
         // r_curve[0] = 0;
         
-        // std::cout << r_curve[0] << std::endl;
-        ode_e2 solution_curve(z_grid[i],lambda,false);
-        boost::numeric::odeint::integrate_const(stepper,solution_curve, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        std::cout << r_curve[0] << std::endl;
+        ode_e2 primordial_bh(z_grid[i],lambda,false);
+        boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
         // The above line gives a solution curve for a single z value. We need to iterate
         // through the grid of z values to complete the curve.
         // NOTE: Need to scroll through solution curves and remove all NAN values.
+        // std::cout << primordial_bh.mu_sol.size() << std::endl;
         full_solution.push_back(R_sol);
-        R_sol.clear();
+        // std::cout << R_sol[0].size() << std::endl;
+        // R_sol.clear();
 
-    }
+    // }
     // std::cout << "Completed solution curves.\n";
     // std::cout << full_solution[0][1][0] << isnan(full_solution[0][1][0]) <<  std::endl;
     // if (!isnan(full_solution[0][0][0]))
@@ -279,6 +292,7 @@ int main(int argc, char** argv) {
 
     // Removing the NaN values from the solution curve vectors.    
     full_sol_transformed = removeNAN(full_solution);
+
     // std::cout << "Removed NAN values from solution curves.\n";
     
 
@@ -311,7 +325,7 @@ int main(int argc, char** argv) {
     // }
     
 
-    matrix_to_file3(full_sol_transformed,test2);
+    matrix_to_file3(R_sol,test2);
     // std::cout << "Saved solution to file\n";
     // for ( size_t i = 0; i < full_sol_transformed.size(); i++) { 
     //     for ( size_t j = 0; j < full_sol_transformed[i].size(); j++) {

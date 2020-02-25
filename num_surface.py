@@ -51,10 +51,10 @@ horz_t = []
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
     # print(len(slice))
-    # try:
-    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
-    # except:
-    #     continue
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
+    except:
+        continue
     # if len(slice) > 1:
     #     for j in range(len(slice) - 1):
     #         lhs = slice[j] - 2*init[i,0] 

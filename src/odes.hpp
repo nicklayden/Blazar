@@ -6,6 +6,8 @@
 */
 #include <vector>
 #include <math.h>
+#include <fstream>
+
 
 struct push_back_state_and_time 
 {
@@ -73,21 +75,30 @@ class ode_e2 {
         ode_e2(double z, double lambda,  bool signflag): m_z(z),m_l(lambda),m_f(signflag) {};
         double m_z,m_l;
         bool m_f;
-
+        std::vector<double> full_sol,mu_sol;
+        // std::ofstream stats_out.open("stats.dat");
         void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
-            double R;
+            double R,mu,rho;
             R = xin[0];
             // z values are independent of each other. so the solution will be evolved for each z.
             // The value being integrated here is R.
             
             // Positive root
             if(m_f) { 
-            dxdt[0] = sqrt(2*E(m_z) + 2*m_z/R  + m_l*R*R/3.);
+                dxdt[0] = sqrt(2*E(m_z) + 2*m_z/R  + m_l*R*R/3.);
             } else { 
-            // Negative root
-            dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R + m_l*R*R/3.);
+                // Negative root
+                dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R + m_l*R*R/3.);
+                // xin[1] = dxdt[0];
+                mu = mu_example2(dxdt[0],R,E(m_z));
+                rho = rho_example2(dxdt[0],R,E(m_z));
+                // xin[2] = mu;
+                // xin[3] = rho;
+                // std::cout << mu << std::endl;
+                std::cout << dxdt[0] << " " << R << " " << mu << " " << rho << std::endl;
             }
 
+            // full_sol.push_back(dxdt[0]);
         }
 
         double E(double z) {
@@ -108,7 +119,23 @@ class ode_e2 {
             return a*d;
         }
 
+        double rho_example2(double rdot, double r, double energy) {
+            // Extended Cartan invariant that detects the horizon
+            double a,b,c,d;
+            a = sqrt(1 + 2*energy);
+            b = rdot - a;
+            c = b/r;
+            return c/sqrt(2.0);
+        }
 
+        double mu_example2(double rdot, double r, double energy) {
+            // Extended Cartan invariant that detects the horizon
+            double a,b,c,d;
+            a = sqrt(1 + 2*energy);
+            b = rdot + a;
+            c = b/r;
+            return -c/sqrt(2.0);
+        }
 
         double M(double z) {
             // M = z^3/2   Jhinghan paper
