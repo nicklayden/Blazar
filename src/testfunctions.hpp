@@ -24,3 +24,22 @@ template <class T>
 T wave_pattern(T x, T y) {
     return sin(x)*cos(y) - 0.6;
 }
+
+// template <class T>
+// T mass_e2(T z) {
+
+// }
+
+// template <class T>
+// T energy_e2(T z) { 
+
+// }
+
+// template <class T>
+// T R_exact_solution_ic_e2(T z) {
+// 	// EXAMPLE 2
+// 	// Solving for R(z,0) for each z. 
+// 	// Need: M(z), E(z) to calculate
+// 	T a,b,c,d,e;
+// 	a = 1. + 2*energy_e2(z)*R(z)/mass_e2(z);
+// }

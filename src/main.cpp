@@ -167,6 +167,20 @@ inline double example2_Rmax(double z) {
     return -mass_e2(z)/energy_e2(z);
 }
 
+inline double Rdot(double r, double z, double lambda) {
+    double a;
+    a = 2*energy_e2(z) + 2*mass_e2(z)/r + lambda*r*r/3.;
+    return -sqrt(a);
+}
+
+double mu_example2(double rdot, double r, double energy) {
+    // Extended Cartan invariant that detects the horizon
+    double a,b,c;
+    a = sqrt(1 + 2*energy);
+    b = rdot + a;
+    c = b/r;
+    return -c/sqrt(2.0);
+}
 
 
 int main(int argc, char** argv) {
@@ -175,7 +189,7 @@ int main(int argc, char** argv) {
     std::ifstream r_init("R_init.dat");
 
     // output file streams
-    std::ofstream test_num_sol,test2;
+    std::ofstream test_num_sol,test2, rdot_f;
     std::ofstream eta_bang_f,eta_crunch_f;
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
@@ -185,7 +199,7 @@ int main(int argc, char** argv) {
 
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
-
+    rdot_f.open("rdot.dat");
 
 
     /***********************************************************************************
@@ -216,12 +230,24 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0.1 + 1e-4;
-    z_end = 0.9 - 1e-4;
+    z_init = 0.+ 1e-3;
+    z_end = 1. - 1e-3;
     eta_init = 0.55;
     eta_end = 1.6;
-    z_n = 5;
+    z_n = 100;
     eta_n = 100;
+
+
+    /*
+
+        INITIAL CONDITIONS ARE A CRITICAL POINT FOR NON ZERO LAMBDA PROBLEM!
+        I.e. SOLUTION WILL NOT GO ANYWHERE
+
+        Need better initial conditions, perhaps theres a better way to pick.
+
+    */
+
+
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
@@ -256,14 +282,14 @@ int main(int argc, char** argv) {
     // Solution containers
     std::vector<double> r_curve(1);
     std::vector<double> t_sol;
-    std::vector<std::vector<double> > R_sol, full_sol_transformed;
+    std::vector<std::vector<double> > R_sol, full_sol_transformed, rdot_sol;
     std::vector<std::vector<std::vector<double> > > full_solution;
-    
+    std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 1000;
+    double t_end = 200;
     double dt = 0.01;
-    double lambda = 0.001;
+    double lambda = 0.0;
 
     // Looping through all initial conditions to get a series of solution curves in the z space.
     for (size_t i = 0; i < z_grid.size(); i++)
@@ -272,7 +298,8 @@ int main(int argc, char** argv) {
         // r_curve[0] = file_input[i][1];
 
         // Initial conditions for example 2:
-        r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[0] = example2_Rmax(z_grid[i]);
+        r_curve[0] = 10*z_grid[i];
 
         // ODE to solve for each initial condition.
         ode_e2 primordial_bh(z_grid[i],lambda,false);
@@ -287,8 +314,25 @@ int main(int argc, char** argv) {
     full_sol_transformed = removeNAN(full_solution);
     matrix_to_file3(full_sol_transformed,test2);
 
+    // double rdot_i, e_i, r_i,mu_i;
+    // // Output some extra things like rho and mu
+    // for (int i = 0; i < full_sol_transformed.size(); ++i)
+    // {
 
-    
+    //     for (int j = 0; j < full_sol_transformed[i].size(); ++j)
+    //     {
+    //         rdot_i = Rdot(full_sol_transformed[i][j],z_grid[i],lambda);
+    //         r_i = full_sol_transformed[i][j];
+    //         e_i = energy_e2(z_grid[i]);
+    //         mu_i = mu_example2(rdot_i,r_i,e_i);
+    //         // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],z_grid[i],lambda));
+    //         rdot_slice.push_back(mu_i);
+    //     }
+    //     rdot_sol.push_back(rdot_slice);
+    //     rdot_slice.clear();
+    // }
+
+    // matrix_to_file3(rdot_sol,rdot_f);
 
 } // End Main
 

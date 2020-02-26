@@ -85,10 +85,10 @@ class ode_e2 {
             
             // Positive root
             if(m_f) { 
-                dxdt[0] = sqrt(2*E(m_z) + 2*m_z/R  + m_l*R*R/3.);
+                dxdt[0] = sqrt(2*E(m_z) + 2*M(m_z)/R  + m_l*R*R/3.);
             } else { 
                 // Negative root
-                dxdt[0] = -sqrt(2*E(m_z) + 2*m_z/R + m_l*R*R/3.);
+                dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
                 // xin[1] = dxdt[0];
                 // mu = mu_example2(dxdt[0],R,E(m_z));
                 // rho = rho_example2(dxdt[0],R,E(m_z));
