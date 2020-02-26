@@ -230,11 +230,11 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0.+ 1e-3;
-    z_end = 1. - 1e-3;
-    eta_init = 0.55;
-    eta_end = 1.6;
-    z_n = 100;
+    z_init = 1e-4;
+    z_end = 0.8;
+    eta_init = 3.;
+    eta_end = 5.;
+    z_n = 25;
     eta_n = 100;
 
 
@@ -287,9 +287,9 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 200;
+    double t_end = 1000;
     double dt = 0.01;
-    double lambda = 0.0;
+    double lambda = 1.;
 
     // Looping through all initial conditions to get a series of solution curves in the z space.
     for (size_t i = 0; i < z_grid.size(); i++)
@@ -298,8 +298,8 @@ int main(int argc, char** argv) {
         // r_curve[0] = file_input[i][1];
 
         // Initial conditions for example 2:
-        // r_curve[0] = example2_Rmax(z_grid[i]);
-        r_curve[0] = 10*z_grid[i];
+        r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[0] = 10*z_grid[i];
 
         // ODE to solve for each initial condition.
         ode_e2 primordial_bh(z_grid[i],lambda,false);
