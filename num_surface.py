@@ -64,14 +64,14 @@ init = np.genfromtxt("z_out.dat")
 # init = np.linspace(1e-4, 1,50 )
 
 surf = open("test2.dat",'r')
-# rdot = open("rdot.dat",'r')
+rdot = open("rdot.dat",'r')
 surf_d = []
 rdot_d = []
 for line in surf:
     # line.split()
     surf_d.append([line])
-# for line in rdot:
-#     rdot_d.append([line])
+for line in rdot:
+    rdot_d.append([line])
 
 horz_r = []
 horz_t = []
@@ -82,13 +82,13 @@ horz_t = []
 lambda_ = 0.0
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
-    # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+    rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
     # print(len(slice))
     # print(len(time[0:len(slice)]))
     try:
         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')
         # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-        # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
+        plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
     except:
         continue
     # if len(slice) > 1:

@@ -313,26 +313,26 @@ int main(int argc, char** argv) {
     // Removing the NaN values from the solution curve vectors.    
     full_sol_transformed = removeNAN(full_solution);
     matrix_to_file3(full_sol_transformed,test2);
+    
+    double rdot_i, e_i, r_i,mu_i;
+    // Output some extra things like rho and mu
+    for (int i = 0; i < full_sol_transformed.size(); ++i)
+    {
 
-    // double rdot_i, e_i, r_i,mu_i;
-    // // Output some extra things like rho and mu
-    // for (int i = 0; i < full_sol_transformed.size(); ++i)
-    // {
+        for (int j = 0; j < full_sol_transformed[i].size(); ++j)
+        {
+            rdot_i = Rdot(full_sol_transformed[i][j],z_grid[i],lambda);
+            r_i = full_sol_transformed[i][j];
+            e_i = energy_e2(z_grid[i]);
+            mu_i = mu_example2(rdot_i,r_i,e_i);
+            // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],z_grid[i],lambda));
+            rdot_slice.push_back(mu_i);
+        }
+        rdot_sol.push_back(rdot_slice);
+        rdot_slice.clear();
+    }
 
-    //     for (int j = 0; j < full_sol_transformed[i].size(); ++j)
-    //     {
-    //         rdot_i = Rdot(full_sol_transformed[i][j],z_grid[i],lambda);
-    //         r_i = full_sol_transformed[i][j];
-    //         e_i = energy_e2(z_grid[i]);
-    //         mu_i = mu_example2(rdot_i,r_i,e_i);
-    //         // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],z_grid[i],lambda));
-    //         rdot_slice.push_back(mu_i);
-    //     }
-    //     rdot_sol.push_back(rdot_slice);
-    //     rdot_slice.clear();
-    // }
-
-    // matrix_to_file3(rdot_sol,rdot_f);
+    matrix_to_file3(rdot_sol,rdot_f);
 
 } // End Main
 
