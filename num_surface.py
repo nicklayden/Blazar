@@ -104,8 +104,25 @@ app_a = app_roots[app_roots[:,0] < split]
 
 print((2./30.), np.cbrt((2./30.)))
 # R = 0, z = 1, t = 2
-dim1 = 1
-dim2 = 2
+dim1 = 2
+dim2 = 0
+
+
+# lambda_ = 1.0
+for i in range(len(surf_d)):
+    slice = np.array(surf_d[i][0].split(),dtype=float)
+    # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+#     print(len(slice))
+#     print(len(time[0:len(slice)]))
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
+        # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
+        # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
+    except:
+        continue
+
+
+
 plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
@@ -113,19 +130,6 @@ plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
 plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0)
 
-
-# lambda_ = 1.0
-# for i in range(len(surf_d)):
-#     slice = np.array(surf_d[i][0].split(),dtype=float)
-#     # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
-# #     print(len(slice))
-# #     print(len(time[0:len(slice)]))
-#     try:
-#         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')
-#         # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-#         # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-#     except:
-#         continue
 #     if len(slice) > 1:
 #         for j in range(len(slice) - 1):
 #             lhs = slice[j] - 2*init[i,0] 
@@ -181,12 +185,12 @@ plt.grid(True)
 # plt.colorbar()
 # plt.xlim(0,12.5)
 # plt.ylim(0,2.8)
-plt.title(" Cosmological and Apparent Horizon Formation, $\Lambda = 0.001$")
-plt.ylabel("t")
-plt.xlabel("z")
+plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = 1.0$")
+plt.ylabel("Areal Radius R(z,t)")
+plt.xlabel("time")
 # plt.yscale("log")
-# plt.ylim(0,200)
-# plt.xlim(0,1)
+plt.ylim(0,0.5)
+plt.xlim(7.9,8.2)
 plt.legend()
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))

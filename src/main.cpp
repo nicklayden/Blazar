@@ -203,6 +203,7 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
         slice.clear();
         for (int j = 0; j < function[i].size()-1; ++j)
         {
+        	// Compute a bracketing set for the zeros of the function in question
             lhs = function[i][j];
             rhs = function[i][j+1];
             if (lhs * rhs <= 0.0) {
@@ -219,8 +220,6 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
         // slice.clear();
     }
     matrix_to_file3(zeros,file);
-
-
 
 }
 
