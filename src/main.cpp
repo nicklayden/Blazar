@@ -294,11 +294,11 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0 +  1e-4;
-    z_end = 1.0;
+    z_init = 0. +  1e-4;
+    z_end = 0.88;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 20;
+    z_n = 200;
     eta_n = 100;
 
 
@@ -352,9 +352,9 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 200;
-    double dt = 0.001;
-    double lambda = 10.;
+    double t_end = 20;
+    double dt = 0.0001;
+    double lambda = 1.0;
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)

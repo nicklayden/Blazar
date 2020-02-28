@@ -11,6 +11,10 @@ import math as m
 def M(z):
     return (z**3)/2.
 
+
+def horizon_cutoff(lam):
+    return np.cbrt((2./3.)/np.sqrt(lam))
+
 def E(z):
     rc = 10.0;
     rw = 1.0;
@@ -84,17 +88,22 @@ inv_r = []
 inv_r2 = []
 inv_t = []
 
-split = 0.3
+lam = 1.0
+print("Maximum horizon formation point ",horizon_cutoff(lam))
+
+split = 1
 
 # identify the different horizons as a split between them
 cosmo_mu = mu_roots[mu_roots[:,0] > split]
 app_mu = mu_roots[mu_roots[:,0] < split]
 
+print(cosmo_mu[-1,1])
+
 cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
 
 print((2./30.), np.cbrt((2./30.)))
-
+# R = 0, z = 1, t = 2
 dim1 = 1
 dim2 = 2
 plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
@@ -177,8 +186,8 @@ plt.ylabel("t")
 plt.xlabel("z")
 # plt.yscale("log")
 # plt.ylim(0,200)
-plt.xlim(0,1)
-plt.legend(loc="upper left")
+# plt.xlim(0,1)
+plt.legend()
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))
 # test = np.array(len(surf_d[40][0].split(" ")))

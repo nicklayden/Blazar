@@ -117,30 +117,33 @@ class ode_e2 {
             d = pow(1 + b - 2*c,4);
 
             return a*d;
+            // return 0.0;
         }
 
-        double rho_example2(double rdot, double r, double energy) {
-            // Extended Cartan invariant that detects the horizon
-            double a,b,c,d;
-            a = sqrt(1 + 2*energy);
-            b = rdot - a;
-            c = b/r;
-            return c/sqrt(2.0);
-        }
+        // double rho_example2(double rdot, double r, double energy) {
+        //     // Extended Cartan invariant that detects the horizon
+        //     double a,b,c,d;
+        //     a = sqrt(1 + 2*energy);
+        //     b = rdot - a;
+        //     c = b/r;
+        //     return c/sqrt(2.0);
+        // }
 
-        double mu_example2(double rdot, double r, double energy) {
-            // Extended Cartan invariant that detects the horizon
-            double a,b,c,d;
-            a = sqrt(1 + 2*energy);
-            b = rdot + a;
-            c = b/r;
-            return -c/sqrt(2.0);
-        }
+        // double mu_example2(double rdot, double r, double energy) {
+        //     // Extended Cartan invariant that detects the horizon
+        //     double a,b,c,d;
+        //     a = sqrt(1 + 2*energy);
+        //     b = rdot + a;
+        //     c = b/r;
+        //     return -c/sqrt(2.0);
+        // }
 
         double M(double z) {
             // M = z^3/2   Jhinghan paper
             return z*z*z/2.;
 
+            // de Sitter Universe M(r) = 0;
+            // return 0;
             // double lambda = 0.1;
             // return (1./3.)/sqrt(lambda);
         }
