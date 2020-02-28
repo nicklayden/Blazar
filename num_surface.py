@@ -59,8 +59,11 @@ def mu(rdot,r,z,l):
 # ax.plot3D(all_curves[100],np.arange(0,len(all_curves[100]),1))
 # plt.show()
 
-time = np.arange(0,5000,0.01)
+# time = np.arange(0,200,0.001)
+time = np.genfromtxt("tsol.dat")
 init = np.genfromtxt("z_out.dat")
+mu_roots = np.genfromtxt("mu_zeros.dat")
+app_roots = np.genfromtxt("apparent_zeros.dat")
 # init = np.linspace(1e-4, 1,50 )
 
 surf = open("test2.dat",'r')
@@ -77,66 +80,101 @@ horz_r = []
 horz_t = []
 # fig = plt.subplots(111)
 
+inv_r = []
+inv_r2 = []
+inv_t = []
+
+split = 5
+
+# identify the different horizons as a split between them
+cosmo_mu = mu_roots[mu_roots[:,0] > split]
+app_mu = mu_roots[mu_roots[:,0] < split]
+
+cosmo_a = app_roots[app_roots[:,0] > split]
+app_a = app_roots[app_roots[:,0] < split]
+
+plt.plot(cosmo_mu[:,1],cosmo_mu[:,2],c='r',lw=2.0, label="$\mu = 0 $")
+plt.plot(app_mu[:,1],app_mu[:,2],c='r',lw=2.0)
 
 
-lambda_ = 0.0
-for i in range(len(surf_d)):
-    slice = np.array(surf_d[i][0].split(),dtype=float)
-    rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
-    # print(len(slice))
-    # print(len(time[0:len(slice)]))
-    try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')
-        # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-        plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-    except:
-        continue
-    # if len(slice) > 1:
-    #     for j in range(len(slice) - 1):
-    #         lhs = slice[j] - 2*init[i,0] 
-    #         rhs = slice[j+1] - 2*init[i,0] 
-    #         if (lhs * rhs) < 0 :
-    #             # horz.append(time[j],slice[j])
-    #             plt.scatter(time[j],slice[j],c='k')
-    # for j in range(len(slice)):
-    #     slice[j] -= 2.0*init(j)
-    # print(slice_)
-    # print(time[0:len(slice_)])
+plt.plot(cosmo_a[:,1],cosmo_a[:,2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(app_a[:,1],app_a[:,2], ls=":",c='k',lw=2.0)
 
+
+# lambda_ = 1.0
 # for i in range(len(surf_d)):
 #     slice = np.array(surf_d[i][0].split(),dtype=float)
 #     # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+# #     print(len(slice))
+# #     print(len(time[0:len(slice)]))
+#     try:
+#         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')
+#         # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
+#         # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
+#     except:
+#         continue
 #     if len(slice) > 1:
 #         for j in range(len(slice) - 1):
-#             lhs = lambda_*(slice[j]**3) - 6*M(init[i]) - 3*slice[j]
-#             rhs = lambda_*(slice[j+1]**3) - 6*M(init[i]) - 3*slice[j+1]
+#             lhs = slice[j] - 2*init[i,0] 
+#             rhs = slice[j+1] - 2*init[i,0] 
+#             if (lhs * rhs) < 0 :
+#                 # horz.append(time[j],slice[j])
+#                 plt.scatter(time[j],slice[j],c='k')
+#     for j in range(len(slice)):
+#         slice[j] -= 2.0*init(j)
+#     print(slice_)
+#     print(time[0:len(slice_)])
 
-            # ml = rdotslice[j] 
-            # mr = rdotslice[j+1]
-            # if (ml * mr) <= 0.:
-            #     horz_r.append(slice[j])
-            #     horz_t.append(time[j])
-            #     continue
+# for i in range(len(surf_d)):
+#     slice = np.array(surf_d[i][0].split(),dtype=float)
+#     rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+#     if len(slice) > 1:
+#         for j in range(len(slice) - 1):
+#             lhs = lambda_*(slice[j]**3) + 6*M(init[i]) - 3*slice[j]
+#             rhs = lambda_*(slice[j+1]**3) + 6*M(init[i]) - 3*slice[j+1]
+
+#             ml = rdotslice[j] 
+#             mr = rdotslice[j+1]
+#             if (ml * mr) < 0.:
+#                 inv_r.append(slice[j])
+#                 # inv_r.append(init[i])
+#                 inv_t.append(time[j])
+#                 continue
 
             # if (lhs * rhs) < 0 :
-            #     if init[i] > 0.11:
-            #         horz_r.append(slice[j])
-            #         # horz_r.append(init[i])
-            #         horz_t.append(time[j])
-            #         # plt.scatter(time[j],slice[j],c='k',marker=',')
+            #     # if init[i] > 0.11:
+            #     horz_r.append(slice[j])
+            #     # horz_r.append(init[i])
+            #     horz_t.append(time[j])
+            #     # plt.scatter(time[j],slice[j],c='k',marker=',')
 
+# plt.plot(init,2*M(init))
 
-# plt.scatter(horz_t,horz_r,lw=3.0,c='g',label="Geometric Horizon")
+# def ineq(lam):
+#     return (2./3.)/np.sqrt(lam)
+# lam = [ineq(lambda_) for i in range(len(init))]
+# plt.plot(init,lam)
+
+# print(len(horz_r))
+# plt.plot(horz_t,horz_r,lw=3.0,c='g',label="Apparent Horizon")
+# plt.scatter(inv_t,inv_r,c='r', label="Geometric Horizon")
+# plt.scatter(inv_t,inv_r2,c='k')
+
+# plt.scatter(mu_roots[:,2],mu_roots[:,0],c='g',lw=2.0,marker='+',label="$\mu = 0 $")
+# plt.scatter(app_roots[:,2],app_roots[:,0],c='r',lw=1.0,marker='x',label="$\Lambda R^3 + 6M - 3R = 0$")
 
 
 plt.grid(True)
 # plt.colorbar()
 # plt.xlim(0,12.5)
 # plt.ylim(0,2.8)
-plt.title("Collapsing Phase with $\Lambda = 1.0$")
-plt.ylabel("R(z,t)")
-plt.xlabel("t")
-# plt.legend()
+plt.title(" Cosmological and Apparent Horizon Formation, $\Lambda = 0.001$")
+plt.ylabel("t")
+plt.xlabel("z")
+# plt.yscale("log")
+# plt.ylim(0,200)
+# plt.xlim(0,1)
+plt.legend(loc="upper left")
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))
 # test = np.array(len(surf_d[40][0].split(" ")))

@@ -87,7 +87,9 @@ void matrix_to_file(std::vector<std::vector<T> > matrix, std::ofstream& ofile) {
 }
 
 template <class T>
-void matrix_to_file3(std::vector<std::vector<T> > matrix, std::ofstream& ofile) {
+void matrix_to_file3(std::vector<std::vector<T> > matrix, std::string file) {
+    std::ofstream ofile;
+    ofile.open(file);
     for (size_t i = 0; i < matrix.size(); i++) {
         for (size_t j = 0; j < matrix[i].size(); j++) {
             ofile << std::setprecision(17) << matrix[i][j] << " "; 

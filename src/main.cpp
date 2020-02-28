@@ -182,6 +182,49 @@ double mu_example2(double rdot, double r, double energy) {
     return -c/sqrt(2.0);
 }
 
+double apparent_horizon(double R, double z, double lambda) {
+    // Debnath Nath Chakraborty 2006 paper equaiton 25
+    // Requires mass for EXAMPLE 2
+    return lambda*pow(R,3) + 6*mass_e2(z) - 3*R;
+
+
+}
+
+void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vector<double> > function,std::vector<double> z, std::vector<double> t, std::string file) {
+    // Compute simple bracketing set , return one half as a pseudo zero set
+    std::vector<std::vector<double> > zeros;
+    std::vector<double> slice;
+    double lhs,rhs;
+
+    for (int i = 0; i < function.size(); ++i)
+    {
+        slice.clear();
+        for (int j = 0; j < function[i].size()-1; ++j)
+        {
+            lhs = function[i][j];
+            rhs = function[i][j+1];
+            if (lhs * rhs <= 0.0) {
+                slice.push_back(rsol[i][j]);
+                slice.push_back(z[i]);
+                slice.push_back(t[j]);
+                zeros.push_back(slice);
+                slice.clear();
+            }
+            
+
+        }
+        // zeros.push_back(slice);
+        // slice.clear();
+    }
+    matrix_to_file3(zeros,file);
+
+
+
+}
+
+
+
+
 
 int main(int argc, char** argv) {
 
@@ -189,7 +232,7 @@ int main(int argc, char** argv) {
     std::ifstream r_init("R_init.dat");
 
     // output file streams
-    std::ofstream test_num_sol,test2, rdot_f;
+    std::ofstream test_num_sol,test2, rdot_f,tsol_f;
     std::ofstream eta_bang_f,eta_crunch_f;
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
@@ -200,6 +243,7 @@ int main(int argc, char** argv) {
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
     rdot_f.open("rdot.dat");
+    tsol_f.open("tsol.dat");
 
 
     /***********************************************************************************
@@ -230,11 +274,11 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 1e-4;
-    z_end = 0.8;
+    z_init = 0 +  1e-4;
+    z_end = 1.0;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 25;
+    z_n = 50;
     eta_n = 100;
 
 
@@ -255,12 +299,11 @@ int main(int argc, char** argv) {
 
     coarse_domain.push_back(z_grid);
     coarse_domain.push_back(eta_grid);
-    // z_out.open("z_out.dat");
-    // for (int i = 0; i < z_grid.size(); ++i)
-    // {
-    //     z_out << z_grid[i] << std::endl;
-    // }
-
+    z_out.open("z_out.dat");
+    for (int i = 0; i < z_grid.size(); ++i)
+    {
+        z_out << z_grid[i] << std::endl;
+    }
 
 
     // compute_and_save_zero_set(alan_theta,coarse_domain,"para.dat");
@@ -283,13 +326,21 @@ int main(int argc, char** argv) {
     std::vector<double> r_curve(1);
     std::vector<double> t_sol;
     std::vector<std::vector<double> > R_sol, full_sol_transformed, rdot_sol;
-    std::vector<std::vector<std::vector<double> > > full_solution;
+    std::vector<std::vector<std::vector<double> > > full_solution, time_solution;
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 1000;
-    double dt = 0.01;
-    double lambda = 1.;
+    double t_end = 2000;
+    double dt = 0.001;
+    double lambda = 0.001;
+    t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
+
+    for (int i = 0; i < t_sol.size(); ++i)
+    {
+        tsol_f << t_sol[i] << std::endl;
+    }
+
+
 
     // Looping through all initial conditions to get a series of solution curves in the z space.
     for (size_t i = 0; i < z_grid.size(); i++)
@@ -312,9 +363,18 @@ int main(int argc, char** argv) {
 
     // Removing the NaN values from the solution curve vectors.    
     full_sol_transformed = removeNAN(full_solution);
-    matrix_to_file3(full_sol_transformed,test2);
+    matrix_to_file3(full_sol_transformed,"test2.dat");
     
-    double rdot_i, e_i, r_i,mu_i;
+
+
+
+    /*
+        OUTPUT OF THE INVARIANTS AND THE APPARENT HORIZON EQUATION
+
+    */
+    std::vector<std::vector<double> > mu_sol, rho_sol,app_sol;
+    std::vector<double> mu_slice, rho_slice, app_slice;
+    double rdot_i, e_i, r_i,mu_i,app_i;
     // Output some extra things like rho and mu
     for (int i = 0; i < full_sol_transformed.size(); ++i)
     {
@@ -325,14 +385,21 @@ int main(int argc, char** argv) {
             r_i = full_sol_transformed[i][j];
             e_i = energy_e2(z_grid[i]);
             mu_i = mu_example2(rdot_i,r_i,e_i);
+            // mu_i = apparent_horizon(r_i,z_grid[i],lambda);
             // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],z_grid[i],lambda));
-            rdot_slice.push_back(mu_i);
-        }
-        rdot_sol.push_back(rdot_slice);
-        rdot_slice.clear();
-    }
+            mu_slice.push_back(mu_i);
 
-    matrix_to_file3(rdot_sol,rdot_f);
+            app_i = apparent_horizon(r_i,z_grid[i],lambda);
+            app_slice.push_back(app_i);
+        }
+        mu_sol.push_back(mu_slice);
+        mu_slice.clear();
+        app_sol.push_back(app_slice);
+        app_slice.clear();
+    }
+    zeros_output(full_sol_transformed, mu_sol,z_grid,t_sol,"mu_zeros.dat");
+    zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat");
+    matrix_to_file3(mu_sol,"rdot.dat");
 
 } // End Main
 
