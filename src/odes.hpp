@@ -140,6 +140,9 @@ class ode_e2 {
         double M(double z) {
             // M = z^3/2   Jhinghan paper
             return z*z*z/2.;
+
+            // double lambda = 0.1;
+            // return (1./3.)/sqrt(lambda);
         }
 
 

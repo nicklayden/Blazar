@@ -84,7 +84,7 @@ inv_r = []
 inv_r2 = []
 inv_t = []
 
-split = 5
+split = 0.3
 
 # identify the different horizons as a split between them
 cosmo_mu = mu_roots[mu_roots[:,0] > split]
@@ -93,12 +93,16 @@ app_mu = mu_roots[mu_roots[:,0] < split]
 cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
 
-plt.plot(cosmo_mu[:,1],cosmo_mu[:,2],c='r',lw=2.0, label="$\mu = 0 $")
-plt.plot(app_mu[:,1],app_mu[:,2],c='r',lw=2.0)
+print((2./30.), np.cbrt((2./30.)))
+
+dim1 = 1
+dim2 = 2
+plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
 
-plt.plot(cosmo_a[:,1],cosmo_a[:,2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-plt.plot(app_a[:,1],app_a[:,2], ls=":",c='k',lw=2.0)
+plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0)
 
 
 # lambda_ = 1.0
@@ -173,7 +177,7 @@ plt.ylabel("t")
 plt.xlabel("z")
 # plt.yscale("log")
 # plt.ylim(0,200)
-# plt.xlim(0,1)
+plt.xlim(0,1)
 plt.legend(loc="upper left")
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))

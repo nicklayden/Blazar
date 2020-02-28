@@ -156,6 +156,8 @@ inline double energy_e2(double z) {
 
 inline double mass_e2(double z) {
     return pow(z,3)/2.;
+    // double lambda = 0.1;
+    // return (1./3.)/sqrt(lambda);
 }
 
 inline double example2_eta_set(double z, double eta) {
@@ -223,6 +225,24 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
 }
 
 
+double R1_debnath(double z, double lambda) {
+    double a,b,c;
+    a = 2./sqrt(lambda);
+
+    c = acos(-(3./2.)*sqrt(lambda*2*mass_e2(z)));
+    b = cos(c/3.);
+    return a*b;
+}
+
+double R2_debnath(double z, double lambda) {
+    double a,b,c,theta;
+    a = 1./sqrt(lambda);
+    theta = acos(-(3./2.)*sqrt(lambda*2*mass_e2(z)));
+    b = -cos(theta/3.) + sqrt(3.) * sin(theta/3.);
+    return a*b;
+}
+
+
 
 
 
@@ -278,7 +298,7 @@ int main(int argc, char** argv) {
     z_end = 1.0;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 50;
+    z_n = 20;
     eta_n = 100;
 
 
@@ -300,6 +320,8 @@ int main(int argc, char** argv) {
     coarse_domain.push_back(z_grid);
     coarse_domain.push_back(eta_grid);
     z_out.open("z_out.dat");
+    std::ofstream r1_f;
+    r1_f.open("debnath.dat");
     for (int i = 0; i < z_grid.size(); ++i)
     {
         z_out << z_grid[i] << std::endl;
@@ -330,9 +352,9 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 2000;
+    double t_end = 200;
     double dt = 0.001;
-    double lambda = 0.001;
+    double lambda = 10.;
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
@@ -340,6 +362,12 @@ int main(int argc, char** argv) {
         tsol_f << t_sol[i] << std::endl;
     }
 
+    // Testing the horizon locations with the table in Debnath et al 2006
+    for (int i = 0; i < z_grid.size(); ++i)
+    {
+        r1_f << R2_debnath(z_grid[i],lambda) << " " << z_grid[i] << " " << 2*mass_e2(z_grid[i]) << " " << energy_e2(z_grid[i]) << std::endl;
+        r1_f << R1_debnath(z_grid[i],lambda) << " " << z_grid[i] << " " << 2*mass_e2(z_grid[i]) << " " << energy_e2(z_grid[i]) << std::endl;
+    }
 
 
     // Looping through all initial conditions to get a series of solution curves in the z space.
