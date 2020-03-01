@@ -48,4 +48,21 @@ def Rh1(z,lam):
 	return a*b;
 
 
-print(Rh1(0.62482899999999997,1))
+# z = 0.5
+# lam = 1.0
+# integral = lambda x: f(Rh1(z,lam),x,lam)
+
+# tah = quad(integral,0,Rh1(z,lam))
+# print(tah)
+
+
+
+# print(Rh1(0.62482899999999997,1))
+
+Rh = np.genfromtxt("t_ah.dat");
+dR = 0.000301003
+print(np.trapz(Rh,dx=dR))
+
+
+
+

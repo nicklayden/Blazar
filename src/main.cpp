@@ -192,6 +192,58 @@ double apparent_horizon(double R, double z, double lambda) {
 
 }
 
+double integrand(double R, double z, double lambda) {
+	// Integral of evolution equation for t_collapse time
+
+	double a,b,c,d;
+
+	a = 2*mass_e2(z)/R;
+	b = 2*energy_e2(z);
+	c = lambda*pow(R,2)/3.;
+	d = a+b+c;
+
+	return 1./sqrt(d);
+
+
+}
+
+
+double trapz(double Rh, double z, double lambda) {
+	// create domain in R
+	int N = 10000;
+	double dr = Rh/N;
+	double sum = 0.0;
+	std::vector<double> Rdomain;
+	std::vector<double> answer;
+	for (int i = 0; i < N; ++i)
+	{
+		Rdomain.push_back(i*(Rh)/N);
+	}
+
+
+	std::vector<double> integral_parts;
+	for (int i = 0; i < N; ++i)
+	{
+		integral_parts.push_back(integrand(Rdomain[i],z,lambda));
+		// integral_parts.push_back(R_domain[i]*Rdomain[i]);
+	}
+
+	for (int i = 1; i < N-1; ++i)
+	{
+		sum += integral_parts[i];
+	}
+
+	sum += integral_parts[0]/2.;
+	sum += integral_parts[N-1]/2.;
+
+	return dr*sum;
+}
+
+
+
+
+
+
 void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vector<double> > function,std::vector<double> z, std::vector<double> t, std::string file) {
     // Compute simple bracketing set , return one half as a pseudo zero set
     std::vector<std::vector<double> > zeros;
@@ -210,6 +262,7 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
                 slice.push_back(rsol[i][j]);
                 slice.push_back(z[i]);
                 slice.push_back(t[j]);
+                slice.push_back(t[j+1]);
                 zeros.push_back(slice);
                 slice.clear();
             }
@@ -297,7 +350,7 @@ int main(int argc, char** argv) {
     z_end = 0.88;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 200;
+    z_n = 20;
     eta_n = 100;
 
 
@@ -352,7 +405,7 @@ int main(int argc, char** argv) {
     // Initial Conditions and parameter values
     double t_start = 0;
     double t_end = 20;
-    double dt = 0.0001;
+    double dt = 0.001;
     double lambda = 1.0;
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
@@ -366,6 +419,20 @@ int main(int argc, char** argv) {
     {
         r1_f << R2_debnath(z_grid[i],lambda) << " " << z_grid[i] << " " << 2*mass_e2(z_grid[i]) << " " << energy_e2(z_grid[i]) << std::endl;
         r1_f << R1_debnath(z_grid[i],lambda) << " " << z_grid[i] << " " << 2*mass_e2(z_grid[i]) << " " << energy_e2(z_grid[i]) << std::endl;
+    }
+
+    std::ofstream t_ah;
+    t_ah.open("t_ah.dat");
+    int num_R = 1000;
+    double R0 = 0;
+    double RN = R2_debnath(z_grid[10],lambda);
+    double Rtemp;
+    std::vector<double> R_domain;
+    std::cout << "dR= " << (RN-R0)/num_R << " z= " <<  z_grid[10] << std::endl;
+    for (int i = 0; i < num_R; ++i)
+    {
+		Rtemp = R0 + i*(RN-R0)/num_R;
+    	t_ah << integrand(Rtemp,z_grid[10],lambda) << std::endl;
     }
 
 
@@ -392,7 +459,7 @@ int main(int argc, char** argv) {
     full_sol_transformed = removeNAN(full_solution);
     matrix_to_file3(full_sol_transformed,"test2.dat");
     
-
+    std::cout << trapz(1.6300831628132759,0.57203499999999996,lambda) << std::endl;
 
 
     /*
@@ -487,9 +554,5 @@ std::vector<std::vector<double> > read_file(std::ifstream& input) {
 
     return result;
 }
-
-
-
-
 
 
