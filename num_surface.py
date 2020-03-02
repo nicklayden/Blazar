@@ -12,6 +12,22 @@ def M(z):
     return (z**3)/2.
 
 
+
+
+def R1_debnath(z,lam):
+
+    a = 2./np.sqrt(lam);
+    c = m.acos(-(3./2.)*np.sqrt(lam)*(2*M(z)));
+    b = np.cos(c/3.);
+    return a*b;
+
+def R2_debnath(z,lam):
+    a = 1./np.sqrt(lam);
+    theta = m.acos(-(3./2.)*np.sqrt(lam)*(2*M(z)));
+    b = -np.cos(theta/3.) + np.sqrt(3.) * np.sin(theta/3.);
+    return a*b;
+
+
 def horizon_cutoff(lam):
     return np.cbrt((2./3.)/np.sqrt(lam))
 
@@ -88,16 +104,16 @@ inv_r = []
 inv_r2 = []
 inv_t = []
 
-lam = 1.0
-print("Maximum horizon formation point ",horizon_cutoff(lam))
+lam = m.pow(2./(3.*m.pow(0.8,3)),2);
+# print("Maximum horizon formation point ",horizon_cutoff(lam))
 
-split = 1
+split = 0.8
 
 # identify the different horizons as a split between them
 cosmo_mu = mu_roots[mu_roots[:,0] > split]
 app_mu = mu_roots[mu_roots[:,0] < split]
 
-print(cosmo_mu[-1,1])
+# print(cosmo_mu[-1,1])
 
 cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
@@ -107,19 +123,26 @@ print((2./30.), np.cbrt((2./30.)))
 dim1 = 2
 dim2 = 0
 
+zmax = horizon_cutoff(lam)
+
+# zs= np.linspace(0.7,0.8,100)
+# R2h = [R2_debnath(i,lam) for i in zs]
+# R1h = [R1_debnath(i,lam) for i in zs]
+# plt.plot(zs,R2h,lw=3.0,c='b',label="$R_{CH}$")
+# plt.plot(zs,R1h,lw=3.0,c='g',label="$R_{AH}$")
 
 # lambda_ = 1.0
-for i in range(len(surf_d)):
-    slice = np.array(surf_d[i][0].split(),dtype=float)
-    # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
-#     print(len(slice))
-#     print(len(time[0:len(slice)]))
-    try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
-        # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-        # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-    except:
-        continue
+# for i in range(len(surf_d)):
+#     slice = np.array(surf_d[i][0].split(),dtype=float)
+#     # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+# #     print(len(slice))
+# #     print(len(time[0:len(slice)]))
+#     try:
+#         plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
+#         # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
+#         # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
+#     except:
+#         continue
 
 
 
@@ -185,13 +208,14 @@ plt.grid(True)
 # plt.colorbar()
 # plt.xlim(0,12.5)
 # plt.ylim(0,2.8)
-plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = 1.0$")
-plt.ylabel("Areal Radius R(z,t)")
-plt.xlabel("time")
+plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = {0:2.3f} $".format(lam))
+plt.ylabel("$R_{H}$")
+plt.xlabel("Time")
 # plt.yscale("log")
-plt.ylim(0,0.5)
-plt.xlim(7.9,8.2)
+# plt.ylim(0,0.5)
+# plt.xlim(7.9,8.2)
 plt.legend()
+# plt.colorbar()
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))
 # test = np.array(len(surf_d[40][0].split(" ")))

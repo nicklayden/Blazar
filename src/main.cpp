@@ -188,8 +188,6 @@ double apparent_horizon(double R, double z, double lambda) {
     // Debnath Nath Chakraborty 2006 paper equaiton 25
     // Requires mass for EXAMPLE 2
     return lambda*pow(R,3) + 6*mass_e2(z) - 3*R;
-
-
 }
 
 double integrand(double R, double z, double lambda) {
@@ -230,13 +228,13 @@ double trapz(double Rh, double z, double lambda) {
 
 	for (int i = 1; i < N-1; ++i)
 	{
-		sum += integral_parts[i];
+		sum += 2*integral_parts[i];
 	}
 
-	sum += integral_parts[0]/2.;
-	sum += integral_parts[N-1]/2.;
+	sum += integral_parts[0];
+	sum += integral_parts[N-1];
 
-	return dr*sum;
+	return dr*sum/2.;
 }
 
 
@@ -281,7 +279,7 @@ double R1_debnath(double z, double lambda) {
     double a,b,c;
     a = 2./sqrt(lambda);
 
-    c = acos(-(3./2.)*sqrt(lambda*2*mass_e2(z)));
+    c = acos(-(3./2.)*sqrt(lambda)*(2*mass_e2(z)));
     b = cos(c/3.);
     return a*b;
 }
@@ -289,7 +287,7 @@ double R1_debnath(double z, double lambda) {
 double R2_debnath(double z, double lambda) {
     double a,b,c,theta;
     a = 1./sqrt(lambda);
-    theta = acos(-(3./2.)*sqrt(lambda*2*mass_e2(z)));
+    theta = acos(-(3./2.)*sqrt(lambda)*(2*mass_e2(z)));
     b = -cos(theta/3.) + sqrt(3.) * sin(theta/3.);
     return a*b;
 }
@@ -346,11 +344,11 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0. +  1e-4;
-    z_end = 0.88;
+    z_init = 0.7 +  1e-4;
+    z_end = 0.8;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 20;
+    z_n = 100;
     eta_n = 100;
 
 
@@ -399,14 +397,14 @@ int main(int argc, char** argv) {
     // Solution containers
     std::vector<double> r_curve(1);
     std::vector<double> t_sol;
-    std::vector<std::vector<double> > R_sol, full_sol_transformed, rdot_sol;
-    std::vector<std::vector<std::vector<double> > > full_solution, time_solution;
+    std::vector<std::vector<double> > R_sol, full_sol_transformed, rdot_sol, fst_refine;
+    std::vector<std::vector<std::vector<double> > > full_solution, time_solution, fs_refine;
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
     double t_end = 20;
-    double dt = 0.001;
-    double lambda = 1.0;
+    double dt = 0.0001;
+    double lambda = pow(2./(3.*pow(0.8,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
@@ -459,7 +457,7 @@ int main(int argc, char** argv) {
     full_sol_transformed = removeNAN(full_solution);
     matrix_to_file3(full_sol_transformed,"test2.dat");
     
-    std::cout << trapz(1.6300831628132759,0.57203499999999996,lambda) << std::endl;
+    std::cout << trapz(17.258256113036616,0.50009999999999999,lambda) << std::endl;
 
 
     /*
@@ -491,9 +489,83 @@ int main(int argc, char** argv) {
         app_sol.push_back(app_slice);
         app_slice.clear();
     }
+    // std::cout << "Wtf1" << std::endl;
     zeros_output(full_sol_transformed, mu_sol,z_grid,t_sol,"mu_zeros.dat");
     zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat");
     matrix_to_file3(mu_sol,"rdot.dat");
+
+
+
+
+
+
+
+    /*
+		Refine the bracketed roots given above using the Horizon detectors(mu=0, AH=0) 
+		by evolving the differential equation again, starting at R_leftbracket(z,t_leftbracket)
+		and evolving up until the point in time t_rightbracket, and say a large number of steps 
+		in between to determine a finer bracket for mu and AH.
+    */
+
+
+ //    double t_start_refine, t_end_refine, dt_refine;
+ //    int N_refine;
+ //    N_refine = 100;
+ //    for (int i = 0; i < mu_sol.size(); ++i)
+ //    {
+ //    	// Set up the ODE again
+ //    	ode_e2 Refiningroots(mu_sol[i][1],lambda,false);
+
+	// 	// Define initial conditions. Starting at R in mu_sol
+ //    	r_curve[0] = mu_sol[i][0];
+ //    	t_start_refine = mu_sol[i][2];
+ //    	t_end_refine = mu_sol[i][3];
+ //    	dt_refine = (t_end_refine - t_start_refine)/N_refine;
+
+ //    	boost::numeric::odeint::integrate_const(stepper,Refiningroots, r_curve, t_start_refine,t_end_refine,dt_refine,push_back_state_and_time(R_sol,t_sol));
+
+ //    	fs_refine.push_back(R_sol);
+ //    	R_sol.clear();
+ //    }
+
+ //    fst_refine = removeNAN(fs_refine);
+ //    matrix_to_file3(fst_refine, "mu_refined_sol.dat");
+
+
+ //    std::vector<std::vector<double> > mu_sol_r, rho_sol_r,app_sol_r;
+ //    std::vector<double> mu_slice_r, rho_slice_r, app_slice_r;
+
+
+	// for (int i = 0; i < fst_refine.size(); ++i)
+ //    {
+
+ //        for (int j = 0; j < fst_refine[i].size(); ++j)
+ //        {
+ //            rdot_i = Rdot(fst_refine[i][j],mu_sol[i][1],lambda);
+ //            r_i = fst_refine[i][j];
+ //            e_i = energy_e2(mu_sol[i][1]);
+ //            mu_i = mu_example2(rdot_i,r_i,e_i);
+ //            // mu_i = apparent_horizon(r_i,mu_sol[i][1],lambda);
+ //            // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],mu_sol[i][1],lambda));
+ //            mu_slice_r.push_back(mu_i);
+
+ //            app_i = apparent_horizon(r_i,mu_sol[i][1],lambda);
+ //            app_slice_r.push_back(app_i);
+ //        }
+ //        mu_sol_r.push_back(mu_slice_r);
+ //        mu_slice_r.clear();
+ //        app_sol_r.push_back(app_slice_r);
+ //        app_slice_r.clear();
+ //    }
+
+ //    zeros_output(fst_refine, mu_sol_r,z_grid,t_sol,"mu_zeros_R.dat");
+ //    zeros_output(fst_refine, app_sol_r,z_grid,t_sol,"apparent_zeros_R.dat");
+
+
+
+
+
+
 
 } // End Main
 
