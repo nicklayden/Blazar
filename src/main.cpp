@@ -205,6 +205,16 @@ double integrand(double R, double z, double lambda) {
 
 }
 
+double zero_force_init(double z, double lambda) {
+	
+
+
+	return pow(mass_e2(z)/(3.*lambda)  ,1./3.);
+}
+
+
+
+
 
 double trapz(double Rh, double z, double lambda) {
 	// create domain in R
@@ -443,6 +453,7 @@ int main(int argc, char** argv) {
 
         // Initial conditions for example 2:
         r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[0] = zero_force_init(z_grid[i],lambda);
         // r_curve[0] = 10*z_grid[i];
 
         // ODE to solve for each initial condition.

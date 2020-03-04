@@ -120,7 +120,6 @@ app_mu = mu_roots[mu_roots[:,0] < split]
 cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
 
-print((2./30.), np.cbrt((2./30.)))
 # R = 0, z = 1, t = 2
 dim1 = 2
 dim2 = 0
@@ -142,13 +141,13 @@ t_collapse = []
 # lambda_ = 1.0
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
-    t_collapse.append(time[len(slice)-2])
-    R_initial.append(slice[0])
+    # t_collapse.append(time[len(slice)-2])
+    # R_initial.append(slice[0])
     # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
 #     print(len(slice))
 #     print(len(time[0:len(slice)]))
-    # try:
-    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.gnuplot(init[i]))
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.gnuplot(init[i]))
         
     #     # 3D Plot test
     #     # times = time[0:len(slice)]
@@ -157,13 +156,13 @@ for i in range(len(surf_d)):
 
     #     # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
     #     # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-    # except:
-    #     continue
+    except:
+        continue
 
 
-plt.plot(t_collapse,R_initial,c='g',lw=2,label="Time until collapse")
-plt.plot(cosmo_mu[:,2],cosmo_mu[:,4],c='r',lw=2, label="$R_{CH}$ Formation")
-plt.plot(app_mu[:,2],app_mu[:,4],c='b',lw=2, label="$R_{AH}$ Formation")
+# plt.plot(t_collapse,R_initial,c='g',lw=2,label="Time until collapse")
+# plt.plot(cosmo_mu[:,2],cosmo_mu[:,4],c='r',lw=2, label="$R_{CH}$ Formation")
+# plt.plot(app_mu[:,2],app_mu[:,4],c='b',lw=2, label="$R_{AH}$ Formation")
 # plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 # plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
@@ -228,7 +227,7 @@ plt.grid(True)
 # plt.ylim(0,2.8)
 # plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = {0:2.3f} $".format(lam))
 
-plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
+# plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
 
 
@@ -236,8 +235,8 @@ plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0
 plt.ylabel("Areal Radius")
 plt.xlabel("Collapse Time")
 # plt.yscale("log")
-plt.ylim(0,200)
-plt.xlim(0,10)
+# plt.ylim(0,200)
+# plt.xlim(0,10)
 plt.legend()
 # plt.colorbar()
 plt.show()
