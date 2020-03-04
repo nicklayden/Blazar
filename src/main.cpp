@@ -261,6 +261,7 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
                 slice.push_back(z[i]);
                 slice.push_back(t[j]);
                 slice.push_back(t[j+1]);
+                slice.push_back(rsol[i][0]);
                 zeros.push_back(slice);
                 slice.clear();
             }
@@ -344,8 +345,8 @@ int main(int argc, char** argv) {
     std::vector<double> z_grid,eta_grid;
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
-    z_init = 0.7 +  1e-4;
-    z_end = 0.8;
+    z_init = 0. +  1e-4;
+    z_end = 1.0;
     eta_init = 3.;
     eta_end = 5.;
     z_n = 100;
@@ -404,7 +405,7 @@ int main(int argc, char** argv) {
     double t_start = 0;
     double t_end = 20;
     double dt = 0.0001;
-    double lambda = pow(2./(3.*pow(0.8,3)),2);
+    double lambda = 1.0;//pow(2./(3.*pow(0.8,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)

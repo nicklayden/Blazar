@@ -1,7 +1,8 @@
+from mpl_toolkits import mplot3d
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from mpl_toolkits import mplot3d
+
 import math as m
 # data = np.genfromtxt("test.dat")
 # R_init = np.genfromtxt("R_init.dat")
@@ -104,10 +105,11 @@ inv_r = []
 inv_r2 = []
 inv_t = []
 
-lam = m.pow(2./(3.*m.pow(0.8,3)),2);
+# lam = m.pow(2./(3.*m.pow(0.8,3)),2);
+lam = 1.0
 # print("Maximum horizon formation point ",horizon_cutoff(lam))
 
-split = 0.8
+split = 1.0
 
 # identify the different horizons as a split between them
 cosmo_mu = mu_roots[mu_roots[:,0] > split]
@@ -131,27 +133,43 @@ zmax = horizon_cutoff(lam)
 # plt.plot(zs,R2h,lw=3.0,c='b',label="$R_{CH}$")
 # plt.plot(zs,R1h,lw=3.0,c='g',label="$R_{AH}$")
 
+
+# fig = plt.figure()
+# ax = plt.axes(projection='3d')
+# ax.set_ylim3d(0,1)
+R_initial = []
+t_collapse = []
 # lambda_ = 1.0
-# for i in range(len(surf_d)):
-#     slice = np.array(surf_d[i][0].split(),dtype=float)
-#     # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
-# #     print(len(slice))
-# #     print(len(time[0:len(slice)]))
-#     try:
-#         plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.jet(init[i]))
-#         # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-#         # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-#     except:
-#         continue
+for i in range(len(surf_d)):
+    slice = np.array(surf_d[i][0].split(),dtype=float)
+    t_collapse.append(time[len(slice)-2])
+    R_initial.append(slice[0])
+    # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
+#     print(len(slice))
+#     print(len(time[0:len(slice)]))
+    # try:
+    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.gnuplot(init[i]))
+        
+    #     # 3D Plot test
+    #     # times = time[0:len(slice)]
+    #     # z = init[i]
+    #     # ax.plot3D(times,slice,z)
+
+    #     # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
+    #     # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
+    # except:
+    #     continue
 
 
+plt.plot(t_collapse,R_initial,c='g',lw=2,label="Time until collapse")
+plt.plot(cosmo_mu[:,2],cosmo_mu[:,4],c='r',lw=2, label="$R_{CH}$ Formation")
+plt.plot(app_mu[:,2],app_mu[:,4],c='b',lw=2, label="$R_{AH}$ Formation")
+# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
-plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
-plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
-
-plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0)
+# plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+# plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0)
 
 #     if len(slice) > 1:
 #         for j in range(len(slice) - 1):
@@ -208,12 +226,18 @@ plt.grid(True)
 # plt.colorbar()
 # plt.xlim(0,12.5)
 # plt.ylim(0,2.8)
-plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = {0:2.3f} $".format(lam))
-plt.ylabel("$R_{H}$")
-plt.xlabel("Time")
+# plt.title(" Cosmological and Apparent Horizon Formation with $\Lambda = {0:2.3f} $".format(lam))
+
+plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
+
+
+
+
+plt.ylabel("Areal Radius")
+plt.xlabel("Collapse Time")
 # plt.yscale("log")
-# plt.ylim(0,0.5)
-# plt.xlim(7.9,8.2)
+plt.ylim(0,200)
+plt.xlim(0,10)
 plt.legend()
 # plt.colorbar()
 plt.show()
