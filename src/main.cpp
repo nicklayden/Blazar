@@ -48,6 +48,20 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::v
 std::vector<std::vector<double> > read_file(std::ifstream& input);
 
 
+
+inline double Eprime(double z) {
+    double cg;
+    cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
+    return cg;
+}
+
+inline double Rprime(double z) {
+    double cg0;
+    cg0 = -0.100e3 * (0.78e2 * pow(z, 0.10e2) - 0.31e2 * pow(z, 0.8e1) + 0.1e1) * pow(0.2e1 * pow(z, 0.10e2) - pow(z, 0.8e1) - 0.1e1, -0.5e1);
+    return cg0;
+}
+
+
 inline mp_type rho_example2(mp_type rdot, mp_type r, mp_type energy) {
     // Extended Cartan invariant that detects the horizon
     mp_type a,b,c,d;
@@ -168,6 +182,15 @@ inline double example2_Rmax(double z) {
     // Start the areal radii at their max value so we can evolve the contracting phase (negative root ODE)
     return -mass_e2(z)/energy_e2(z);
 }
+
+inline double example2_Rprime_init(double z) {
+    double a,b, Mp;
+    Mp = 3*z*z/2.;
+    a = -Mp/energy_e2(z);
+    b = (mass_e2(z)/pow(energy_e2(z),2))*Eprime(z);
+    return a + b;
+}
+
 
 inline double Rdot(double r, double z, double lambda) {
     double a;
@@ -356,10 +379,10 @@ int main(int argc, char** argv) {
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
     z_init = 0. +  1e-4;
-    z_end = 1.0;
+    z_end = 0.63;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 100;
+    z_n = 200;
     eta_n = 100;
 
 
@@ -376,6 +399,15 @@ int main(int argc, char** argv) {
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
+    for (int i = 0; i < 200; ++i)
+    {
+        z_grid.push_back(0.63 + ((double)i/200.)*(0.005));
+    }
+    for (int i = 0; i < 20; ++i)
+    {
+        z_grid.push_back(0.635 + ((double)i/20.)*(0.165));
+    }
+
     eta_grid = create_grid(eta_init, eta_end, eta_n);
 
     coarse_domain.push_back(z_grid);
@@ -406,15 +438,15 @@ int main(int argc, char** argv) {
     // Integration method
     boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
     // Solution containers
-    std::vector<double> r_curve(1);
+    std::vector<double> r_curve(2);
     std::vector<double> t_sol;
-    std::vector<std::vector<double> > R_sol, full_sol_transformed, rdot_sol, fst_refine;
+    std::vector<std::vector<double> > R_sol, full_sol_transformed,Rprime_sol, rdot_sol, fst_refine;
     std::vector<std::vector<std::vector<double> > > full_solution, time_solution, fs_refine;
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 20;
-    double dt = 0.0001;
+    double t_end = 25;
+    double dt = 0.001;
     double lambda = 1.0;//pow(2./(3.*pow(0.8,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
@@ -437,22 +469,22 @@ int main(int argc, char** argv) {
     double RN = R2_debnath(z_grid[10],lambda);
     double Rtemp;
     std::vector<double> R_domain;
-    std::cout << "dR= " << (RN-R0)/num_R << " z= " <<  z_grid[10] << std::endl;
-    for (int i = 0; i < num_R; ++i)
-    {
-		Rtemp = R0 + i*(RN-R0)/num_R;
-    	t_ah << integrand(Rtemp,z_grid[10],lambda) << std::endl;
-    }
+  //   for (int i = 0; i < num_R; ++i)
+  //   {
+		// Rtemp = R0 + i*(RN-R0)/num_R;
+  //   	t_ah << integrand(Rtemp,z_grid[10],lambda) << std::endl;
+  //   }
 
-
+    std::cout << "Calculating solution curve for i= " << std::endl;
     // Looping through all initial conditions to get a series of solution curves in the z space.
     for (size_t i = 0; i < z_grid.size(); i++)
     {
         // Initial conditions for example 1:
         // r_curve[0] = file_input[i][1];
-
+        std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
         // Initial conditions for example 2:
         r_curve[0] = example2_Rmax(z_grid[i]);
+        r_curve[1] = example2_Rprime_init(z_grid[i]);
         // r_curve[0] = zero_force_init(z_grid[i],lambda);
         // r_curve[0] = 10*z_grid[i];
 
@@ -463,19 +495,23 @@ int main(int argc, char** argv) {
         // std::cout << R_sol[0].size() << std::endl;
         R_sol.clear();
 
-    }
 
+    }
+    std::cout << "Completed ODE solutions" << std::endl;
+    std::cout << "Saving solution curves to file" << std::endl;
     // Removing the NaN values from the solution curve vectors.    
     full_sol_transformed = removeNAN(full_solution);
+    Rprime_sol = removeNAN(full_solution,1);
     matrix_to_file3(full_sol_transformed,"test2.dat");
-    
-    std::cout << trapz(17.258256113036616,0.50009999999999999,lambda) << std::endl;
-
+    matrix_to_file3(Rprime_sol,"Rprime.dat");
 
     /*
         OUTPUT OF THE INVARIANTS AND THE APPARENT HORIZON EQUATION
 
     */
+
+    std::cout << "Calculating Horizon and Shell Crossing Detectors" << std::endl;
+
     std::vector<std::vector<double> > mu_sol, rho_sol,app_sol;
     std::vector<double> mu_slice, rho_slice, app_slice;
     double rdot_i, e_i, r_i,mu_i,app_i;
@@ -506,6 +542,11 @@ int main(int argc, char** argv) {
     zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat");
     matrix_to_file3(mu_sol,"rdot.dat");
 
+     /*
+       Finding the zeros of the Rprime solution curve, this is C_0 !!
+
+    */
+    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat");
 
 
 

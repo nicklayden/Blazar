@@ -78,17 +78,20 @@ class ode_e2 {
         std::vector<double> full_sol,mu_sol;
         // std::ofstream stats_out.open("stats.dat");
         void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
-            double R,mu,rho;
+            double R,mu,rho, Rp;
             R = xin[0];
+            Rp = xin[1];
             // z values are independent of each other. so the solution will be evolved for each z.
             // The value being integrated here is R.
             
             // Positive root
             if(m_f) { 
                 dxdt[0] = sqrt(2*E(m_z) + 2*M(m_z)/R  + m_l*R*R/3.);
+                dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
             } else { 
                 // Negative root
                 dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
+                dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
                 // xin[1] = dxdt[0];
                 // mu = mu_example2(dxdt[0],R,E(m_z));
                 // rho = rho_example2(dxdt[0],R,E(m_z));
@@ -120,23 +123,23 @@ class ode_e2 {
             // return 0.0;
         }
 
-        // double rho_example2(double rdot, double r, double energy) {
-        //     // Extended Cartan invariant that detects the horizon
-        //     double a,b,c,d;
-        //     a = sqrt(1 + 2*energy);
-        //     b = rdot - a;
-        //     c = b/r;
-        //     return c/sqrt(2.0);
-        // }
+        double rho_example2(double rdot, double r, double energy) {
+            // Extended Cartan invariant that detects the horizon
+            double a,b,c,d;
+            a = sqrt(1 + 2*energy);
+            b = rdot - a;
+            c = b/r;
+            return c/sqrt(2.0);
+        }
 
-        // double mu_example2(double rdot, double r, double energy) {
-        //     // Extended Cartan invariant that detects the horizon
-        //     double a,b,c,d;
-        //     a = sqrt(1 + 2*energy);
-        //     b = rdot + a;
-        //     c = b/r;
-        //     return -c/sqrt(2.0);
-        // }
+        double mu_example2(double rdot, double r, double energy) {
+            // Extended Cartan invariant that detects the horizon
+            double a,b,c,d;
+            a = sqrt(1 + 2*energy);
+            b = rdot + a;
+            c = b/r;
+            return -c/sqrt(2.0);
+        }
 
         double M(double z) {
             // M = z^3/2   Jhinghan paper
@@ -148,6 +151,29 @@ class ode_e2 {
             // return (1./3.)/sqrt(lambda);
         }
 
+        double udot(double u, double rd, double r,double z, double lambda) {
+            // Rprime dot equation, trying to solve for Rprime for each time in the domain.
+            // This helps calculate rho the energy density.
+            // This is a second ODE to solve concurrently.
+            double a,b,c,d,e;
+            a = 1./rd;
+            b = Mprime(z)/r;
+            c = -M(z)*u/pow(r,2.);
+            d = Eprime(z);
+            e = lambda*r*u/3.;
+            return a*(b+c+d+e);
+
+
+        }
+
+        double Mprime(double z) {
+            return 3.*z*z/2.;
+        }
+        double Eprime(double z) {
+            double cg;
+            cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
+            return cg;
+        }
 
 };
 

@@ -375,7 +375,7 @@ std::vector<std::vector<T> > compute_surface( T (*f)(T,T), std::vector<T> z_grid
 }
 
 template <class T>
-std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > >& input) {
+std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > >& input, int k = 0) {
     // SPECIAL NOTE: Need to fix up the way the full solution is handled.
     //               Currently it has 1 too many dimensions in the vector.
     
@@ -388,9 +388,9 @@ std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > 
     {
         for (size_t j = 0; j < input[0].size(); j++)
         {
-            if (!isnan(input[i][j][0]))
+            if (!isnan(input[i][j][k]))
             {
-                section.push_back(input[i][j][0]);
+                section.push_back(input[i][j][k]);
             }
         }
         noNAN.push_back(section);

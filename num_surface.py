@@ -85,17 +85,25 @@ time = np.genfromtxt("tsol.dat")
 init = np.genfromtxt("z_out.dat")
 mu_roots = np.genfromtxt("mu_zeros.dat")
 app_roots = np.genfromtxt("apparent_zeros.dat")
+Rprime_roots = np.genfromtxt("Rprime_zeros.dat")
 # init = np.linspace(1e-4, 1,50 )
 
+
 surf = open("test2.dat",'r')
+rprime = open("Rprime.dat",'r')
 rdot = open("rdot.dat",'r')
 surf_d = []
 rdot_d = []
+rprime_d = []
 for line in surf:
     # line.split()
     surf_d.append([line])
 for line in rdot:
     rdot_d.append([line])
+for line in rprime:
+    rprime_d.append([line])
+
+
 
 horz_r = []
 horz_t = []
@@ -121,8 +129,8 @@ cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
 
 # R = 0, z = 1, t = 2
-dim1 = 2
-dim2 = 0
+dim1 = 1
+dim2 = 2
 
 zmax = horizon_cutoff(lam)
 
@@ -138,37 +146,39 @@ zmax = horizon_cutoff(lam)
 # ax.set_ylim3d(0,1)
 R_initial = []
 t_collapse = []
-# lambda_ = 1.0
+
 for i in range(len(surf_d)):
     slice = np.array(surf_d[i][0].split(),dtype=float)
-    # t_collapse.append(time[len(slice)-2])
-    # R_initial.append(slice[0])
-    # rdotslice = np.array(rdot_d[i][0].split(),dtype=float)
-#     print(len(slice))
-#     print(len(time[0:len(slice)]))
-    try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c=cm.gnuplot(init[i]))
-        
-    #     # 3D Plot test
-    #     # times = time[0:len(slice)]
-    #     # z = init[i]
-    #     # ax.plot3D(times,slice,z)
+    t_collapse.append(time[len(slice)-2])
+    R_initial.append(slice[0])
 
-    #     # plt.plot(time[0:len(slice)],mu(slice,init[i],lambda_))
-    #     # plt.plot(time[0:len(rdotslice)],rdotslice,lw=0.5,c='r')
-    except:
-        continue
+    # try:
+    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+
+    # except:
+    #     continue
 
 
-# plt.plot(t_collapse,R_initial,c='g',lw=2,label="Time until collapse")
-# plt.plot(cosmo_mu[:,2],cosmo_mu[:,4],c='r',lw=2, label="$R_{CH}$ Formation")
-# plt.plot(app_mu[:,2],app_mu[:,4],c='b',lw=2, label="$R_{AH}$ Formation")
-# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
-# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0)
 
 
+plt.plot(init,t_collapse,c='g',lw=2,label="Time until collapse")
+# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2, label="$R_{CH}$ Formation")
+# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='b',lw=2, label="$R_{AH}$ Formation")
+
+# Apparent Horizon Detectors
+plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
+plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
+
+# Cosmological Horizon Detectors
 # plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-# plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0)
+# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+
+
+# Shell Crossing Detector
+plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='b',label="$C_0 = 0$")
+
+
+
 
 #     if len(slice) > 1:
 #         for j in range(len(slice) - 1):
@@ -229,14 +239,14 @@ plt.grid(True)
 
 # plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
+plt.title("Horizon, Singularity, Shell Crossing formation time, \n $\Lambda = 1.0$")
 
 
-
-plt.ylabel("Areal Radius")
-plt.xlabel("Collapse Time")
+plt.ylabel("Time")
+plt.xlabel("z")
 # plt.yscale("log")
-# plt.ylim(0,200)
-# plt.xlim(0,10)
+# plt.ylim(0,10)
+plt.xlim(0,0.75)
 plt.legend()
 # plt.colorbar()
 plt.show()
