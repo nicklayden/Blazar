@@ -114,7 +114,7 @@ inv_r2 = []
 inv_t = []
 
 # lam = m.pow(2./(3.*m.pow(1.0,3)),2);
-lam = 0.001
+lam = 1.0
 # print("Maximum horizon formation point ",horizon_cutoff(lam))
 
 split = 1.0
@@ -147,16 +147,16 @@ zmax = horizon_cutoff(lam)
 R_initial = []
 t_collapse = []
 
-# for i in range(len(surf_d)):
-#     slice = np.array(surf_d[i][0].split(),dtype=float)
-#     t_collapse.append(time[len(slice)-2])
-#     R_initial.append(slice[0])
+for i in range(len(surf_d)):
+    slice = np.array(surf_d[i][0].split(),dtype=float)
+    t_collapse.append(time[len(slice)-2])
+    R_initial.append(slice[0])
 
-    # try:
-    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
 
-    # except:
-    #     continue
+    except:
+        continue
 
 
 
@@ -175,7 +175,7 @@ plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 
 
 
 # Shell Crossing Detector
-# plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='b',label="$C_0 = 0$")
+plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='m',label="$C_0 = 0$")
 
 
 
@@ -245,8 +245,8 @@ plt.title("Apparent Horizon Detection, \n $\Lambda = {0}$".format(lam))
 plt.ylabel("R(t,z)")
 plt.xlabel("Time")
 # plt.yscale("log")
-# plt.ylim(0,10)
-# plt.xlim(0,0.75)
+plt.ylim(0,10)
+plt.xlim(7.5,8.5)
 plt.legend()
 # plt.colorbar()
 plt.show()
