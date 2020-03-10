@@ -113,8 +113,8 @@ inv_r = []
 inv_r2 = []
 inv_t = []
 
-# lam = m.pow(2./(3.*m.pow(0.8,3)),2);
-lam = 1.0
+# lam = m.pow(2./(3.*m.pow(1.0,3)),2);
+lam = 0.001
 # print("Maximum horizon formation point ",horizon_cutoff(lam))
 
 split = 1.0
@@ -129,8 +129,8 @@ cosmo_a = app_roots[app_roots[:,0] > split]
 app_a = app_roots[app_roots[:,0] < split]
 
 # R = 0, z = 1, t = 2
-dim1 = 1
-dim2 = 2
+dim1 = 2
+dim2 = 0
 
 zmax = horizon_cutoff(lam)
 
@@ -147,10 +147,10 @@ zmax = horizon_cutoff(lam)
 R_initial = []
 t_collapse = []
 
-for i in range(len(surf_d)):
-    slice = np.array(surf_d[i][0].split(),dtype=float)
-    t_collapse.append(time[len(slice)-2])
-    R_initial.append(slice[0])
+# for i in range(len(surf_d)):
+#     slice = np.array(surf_d[i][0].split(),dtype=float)
+#     t_collapse.append(time[len(slice)-2])
+#     R_initial.append(slice[0])
 
     # try:
     #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
@@ -161,7 +161,7 @@ for i in range(len(surf_d)):
 
 
 
-plt.plot(init,t_collapse,c='g',lw=2,label="Time until collapse")
+# plt.plot(init,t_collapse,c='g',lw=2,label="Time until collapse")
 # plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2, label="$R_{CH}$ Formation")
 # plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='b',lw=2, label="$R_{AH}$ Formation")
 
@@ -175,7 +175,7 @@ plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 
 
 
 # Shell Crossing Detector
-plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='b',label="$C_0 = 0$")
+# plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='b',label="$C_0 = 0$")
 
 
 
@@ -239,14 +239,14 @@ plt.grid(True)
 
 # plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
-plt.title("Horizon, Singularity, Shell Crossing formation time, \n $\Lambda = 1.0$")
+plt.title("Apparent Horizon Detection, \n $\Lambda = {0}$".format(lam))
 
 
-plt.ylabel("Time")
-plt.xlabel("z")
+plt.ylabel("R(t,z)")
+plt.xlabel("Time")
 # plt.yscale("log")
 # plt.ylim(0,10)
-plt.xlim(0,0.75)
+# plt.xlim(0,0.75)
 plt.legend()
 # plt.colorbar()
 plt.show()

@@ -379,10 +379,10 @@ int main(int argc, char** argv) {
     std::vector<std::vector<double> > coarse_domain;
     // grid definitions:
     z_init = 0. +  1e-4;
-    z_end = 0.63;
+    z_end = 1.;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 200;
+    z_n = 100;
     eta_n = 100;
 
 
@@ -399,14 +399,14 @@ int main(int argc, char** argv) {
 
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
-    for (int i = 0; i < 200; ++i)
-    {
-        z_grid.push_back(0.63 + ((double)i/200.)*(0.005));
-    }
-    for (int i = 0; i < 20; ++i)
-    {
-        z_grid.push_back(0.635 + ((double)i/20.)*(0.165));
-    }
+    // for (int i = 0; i < 200; ++i)
+    // {
+    //     z_grid.push_back(0.63 + ((double)i/200.)*(0.005));
+    // }
+    // for (int i = 0; i < 20; ++i)
+    // {
+    //     z_grid.push_back(0.635 + ((double)i/20.)*(0.165));
+    // }
 
     eta_grid = create_grid(eta_init, eta_end, eta_n);
 
@@ -445,9 +445,9 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 25;
+    double t_end = 200;
     double dt = 0.001;
-    double lambda = 1.0;//pow(2./(3.*pow(0.8,3)),2);
+    double lambda =0.001;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
