@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import quad
 import math as m
+import matplotlib.pyplot as plt
 # double R1_debnath(double z, double lambda) {
 #     double a,b,c;
 #     a = 2./sqrt(lambda);
@@ -52,16 +53,28 @@ def Rh1(z,lam):
 # lam = 1.0
 # integral = lambda x: f(Rh1(z,lam),x,lam)
 
-# tah = quad(integral,0,Rh1(z,lam))
+# tah = quad(integral,0.001,Rh1(z,lam))
 # print(tah)
 
 
+z = np.arange(1e-4,1,0.001)
+def R(z):
+	a = (z**3)/2.
+	b = E(z)
+	return a/b
+R_v = np.vectorize(R)
+Ev = np.vectorize(E)
 
-# print(Rh1(0.62482899999999997,1))
+# plt.plot(z,R_v(z))
+plt.plot(z,Ev(z))
+# plt.ylim(-5,0)
+# plt.xlim(0,1)
+plt.show()
+# # print(Rh1(0.62482899999999997,1))
 
-Rh = np.genfromtxt("t_ah.dat");
-dR = 0.000301003
-print(np.trapz(Rh,dx=dR))
+# Rh = np.genfromtxt("t_ah.dat");
+# dR = 0.000301003
+# print(np.trapz(Rh,dx=dR))
 
 
 

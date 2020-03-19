@@ -74,6 +74,9 @@ class ode_e2 {
     public: 
         ode_e2(double z, double lambda,  bool signflag): m_z(z),m_l(lambda),m_f(signflag) {};
         double m_z,m_l;
+        // Fixing to the x=y=0 plane for now.
+        double x=1;
+        double y=1;
         bool m_f;
         std::vector<double> full_sol,mu_sol;
         // std::ofstream stats_out.open("stats.dat");
@@ -89,16 +92,16 @@ class ode_e2 {
                 dxdt[0] = sqrt(2*E(m_z) + 2*M(m_z)/R  + m_l*R*R/3.);
                 dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
             } else { 
-                // Negative root
-                dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
+                // Negative root: Rdot equation
+                // dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
+                // dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
+                
+                // Ydot equations -- full quasispherical problem here.
+                dxdt[0] = -sqrt(2*M(m_z)/(R*pow(H(m_z,x,y),3)) + 2*E(m_z)/(pow(H(m_z,x,y),2)) + m_l*R*R/3. );
                 dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
-                // xin[1] = dxdt[0];
-                // mu = mu_example2(dxdt[0],R,E(m_z));
-                // rho = rho_example2(dxdt[0],R,E(m_z));
-                // xin[2] = mu;
-                // xin[3] = rho;
-                // std::cout << mu << std::endl;
-                // std::cout << dxdt[0] << " " << R << " " << mu << " " << rho << std::endl;
+
+                // If solving for Y now, need to rescale to get R back!
+
             }
 
             // full_sol.push_back(dxdt[0]);
@@ -165,6 +168,30 @@ class ode_e2 {
 
 
         }
+
+        double H(double z,double x, double y) {
+            double h,a,b,s;
+            s = S(z);
+            a = (x-P(z))/s;
+            b = (y-Q(z))/s;
+            h = s/2;
+            return h*(1. + pow(a,2) + pow(b,2));
+        }
+
+
+        double S(double z) {
+            return sqrt(2)*z;
+        }
+
+        double P(double z) {
+            return 0;
+        }
+
+        double Q(double z) {
+            return 0;
+        }
+
+
 
         double Mprime(double z) {
             return 3.*z*z/2.;

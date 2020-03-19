@@ -49,6 +49,28 @@ std::vector<std::vector<double> > read_file(std::ifstream& input);
 
 
 
+double H(double z,double x, double y) {
+    double h,a,b,s;
+    s = S(z);
+    a = (x-P(z))/s;
+    b = (y-Q(z))/s;
+    h = s/2;
+    return h*(1. + pow(a,2) + pow(b,2));
+}
+
+
+double S(double z) {
+    return sqrt(2)*z;
+}
+
+double P(double z) {
+    return 0;
+}
+
+double Q(double z) {
+    return 0;
+}
+
 inline double Eprime(double z) {
     double cg;
     cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
@@ -275,17 +297,19 @@ double trapz(double Rh, double z, double lambda) {
 
 
 
-void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vector<double> > function,std::vector<double> z, std::vector<double> t, std::string file) {
+void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vector<double> > function,std::vector<double> z, std::vector<double> t, std::string file, double lambda) {
     // Compute simple bracketing set , return one half as a pseudo zero set
     std::vector<std::vector<double> > zeros;
     std::vector<double> slice;
     double lhs,rhs;
+    int jmax;
 
     for (int i = 0; i < function.size(); ++i)
     {
         slice.clear();
         for (int j = 0; j < function[i].size()-1; ++j)
         {
+            jmax = function[i].size()-1;
         	// Compute a bracketing set for the zeros of the function in question
             lhs = function[i][j];
             rhs = function[i][j+1];
@@ -294,7 +318,9 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
                 slice.push_back(z[i]);
                 slice.push_back(t[j]);
                 slice.push_back(t[j+1]);
+                slice.push_back(t[jmax]);
                 slice.push_back(rsol[i][0]);
+                slice.push_back(trapz(rsol[i][0],z[i],lambda));
                 zeros.push_back(slice);
                 slice.clear();
             }
@@ -326,7 +352,27 @@ double R2_debnath(double z, double lambda) {
     return a*b;
 }
 
+inline double E2_init_focus_r(double z, double lambda) {
+    // All shells collapse to R=0 at time tc -- minimized integrand
+    // in my written notes
+    double a;
+    a = pow(3./(2.*lambda),1./3.);
+    return a*z;
+}
 
+inline double E2_init_focus_rprime(double z, double lambda) {
+    // Rprime(0,z) corresponding to above function
+    return pow((3./(2*lambda)),1./3.);
+
+}
+
+inline mp_type Shellfocus_sing(mp_type z, mp_type p) {
+    // p is a shitty placeholder for the root finder
+    mp_type lambda=1.0;
+    mp_type m;
+    m = pow(z,3.)/2.;
+    return lambda*m*m + 3.*pow((mp_type)energy_e2((double)z),3.);
+}
 
 
 
@@ -376,14 +422,15 @@ int main(int argc, char** argv) {
     double z_init, z_end, eta_init, eta_end, eta_current;
     size_t z_n, eta_n;
     std::vector<double> z_grid,eta_grid;
-    std::vector<std::vector<double> > coarse_domain;
+    std::vector<mp_type> z_roots, eta_roots;
+    std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
     z_init = 0. +  1e-4;
     z_end = 1.;
     eta_init = 3.;
     eta_end = 5.;
-    z_n = 100;
-    eta_n = 100;
+    z_n = 80;
+    eta_n = 1;
 
 
     /*
@@ -395,8 +442,8 @@ int main(int argc, char** argv) {
 
     */
 
-
-
+    z_roots = create_grid((mp_type) z_init, (mp_type) z_end, z_n);
+    eta_roots = create_grid((mp_type) eta_init, (mp_type) eta_end, eta_n);
     // Create mesh grids:
     z_grid = create_grid(z_init,z_end,z_n);
     // for (int i = 0; i < 200; ++i)
@@ -410,8 +457,8 @@ int main(int argc, char** argv) {
 
     eta_grid = create_grid(eta_init, eta_end, eta_n);
 
-    coarse_domain.push_back(z_grid);
-    coarse_domain.push_back(eta_grid);
+    coarse_domain.push_back(z_roots);
+    coarse_domain.push_back(eta_roots);
     z_out.open("z_out.dat");
     std::ofstream r1_f;
     r1_f.open("debnath.dat");
@@ -420,7 +467,7 @@ int main(int argc, char** argv) {
         z_out << z_grid[i] << std::endl;
     }
 
-
+    // compute_and_save_zero_set(Shellfocus_sing,coarse_domain,"para.dat");
     // compute_and_save_zero_set(alan_theta,coarse_domain,"para.dat");
     // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
     // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
@@ -445,7 +492,7 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 15;
+    double t_end = 20;
     double dt = 0.001;
     double lambda =1.;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
@@ -482,9 +529,25 @@ int main(int argc, char** argv) {
         // Initial conditions for example 1:
         // r_curve[0] = file_input[i][1];
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
-        // Initial conditions for example 2:
-        r_curve[0] = example2_Rmax(z_grid[i]);
+
+        // Initial conditions for example 2: influenced by exact soln
+        r_curve[0] = example2_Rmax(z_grid[i])/(sqrt(2)*z_grid[i]);
         r_curve[1] = example2_Rprime_init(z_grid[i]);
+
+        // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
+        // r_curve[0] = 2*z_grid[i];
+        // r_curve[1] = 2;
+
+        // Initial conditions to focus R=0 at a single time instant for all shells ? Maybe
+        // r_curve[0] = E2_init_focus_r(z_grid[i],lambda);
+        // r_curve[1] = E2_init_focus_rprime(z_grid[i],lambda);
+
+        // Compute the collapse time for each shell and use it to limit the integrator
+        // std::cout << i << ", t_c = " << trapz(r_curve[0],z_grid[i],lambda) << ", z_i = " << z_grid[i] << std::endl;
+        // t_end = trapz(r_curve[0],z_grid[i],lambda);
+
+
+
         // r_curve[0] = zero_force_init(z_grid[i],lambda);
         // r_curve[0] = 10*z_grid[i];
 
@@ -538,15 +601,15 @@ int main(int argc, char** argv) {
         app_slice.clear();
     }
     // std::cout << "Wtf1" << std::endl;
-    zeros_output(full_sol_transformed, mu_sol,z_grid,t_sol,"mu_zeros.dat");
-    zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat");
+    zeros_output(full_sol_transformed, mu_sol,z_grid,t_sol,"mu_zeros.dat",lambda);
+    zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat",lambda);
     matrix_to_file3(mu_sol,"rdot.dat");
 
      /*
        Finding the zeros of the Rprime solution curve, this is C_0 !!
 
     */
-    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat");
+    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
 
 
 
