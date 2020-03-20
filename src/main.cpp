@@ -49,7 +49,23 @@ std::vector<std::vector<double> > read_file(std::ifstream& input);
 
 
 
-double H(double z,double x, double y) {
+inline double S(double z) {
+    return sqrt(2)*z;
+}
+
+inline double Sprime(double z) {
+    return sqrt(2);
+}
+
+inline double P(double z) {
+    return 0;
+}
+
+inline double Q(double z) {
+    return 0;
+}
+
+inline double H(double z,double x, double y) {
     double h,a,b,s;
     s = S(z);
     a = (x-P(z))/s;
@@ -58,17 +74,8 @@ double H(double z,double x, double y) {
     return h*(1. + pow(a,2) + pow(b,2));
 }
 
-
-double S(double z) {
-    return sqrt(2)*z;
-}
-
-double P(double z) {
-    return 0;
-}
-
-double Q(double z) {
-    return 0;
+inline double Hprime(double z, double x, double y) {
+    return (Sprime(z)*(pow(S(z),2) - x*x - y*y))/(2*pow(S(z),2));
 }
 
 inline double Eprime(double z) {
@@ -314,24 +321,22 @@ void zeros_output(std::vector<std::vector<double> > rsol, std::vector<std::vecto
             lhs = function[i][j];
             rhs = function[i][j+1];
             if (lhs * rhs <= 0.0) {
-                slice.push_back(rsol[i][j]);
-                slice.push_back(z[i]);
-                slice.push_back(t[j]);
-                slice.push_back(t[j+1]);
-                slice.push_back(t[jmax]);
-                slice.push_back(rsol[i][0]);
-                slice.push_back(trapz(rsol[i][0],z[i],lambda));
+                slice.push_back(rsol[i][j]); // left bracket of the zero 
+                slice.push_back(z[i]); // z position of the zero
+                slice.push_back(t[j]); // time of the zero
+                slice.push_back(t[j+1]); // time bracket of the zero
+                slice.push_back(t[jmax]); // maximum time until solution breaks 
+                slice.push_back(rsol[i][0]); // initial value of R
+                slice.push_back(trapz(rsol[i][0],z[i],lambda)); // collapse time integral from R_0
+
                 zeros.push_back(slice);
                 slice.clear();
             }
             
 
         }
-        // zeros.push_back(slice);
-        // slice.clear();
     }
     matrix_to_file3(zeros,file);
-
 }
 
 
@@ -419,7 +424,7 @@ int main(int argc, char** argv) {
     // }
 
     std::ofstream z_out;
-    double z_init, z_end, eta_init, eta_end, eta_current;
+    double z_init, z_end, eta_init, eta_end, eta_current, x_grid,y_grid;
     size_t z_n, eta_n;
     std::vector<double> z_grid,eta_grid;
     std::vector<mp_type> z_roots, eta_roots;
@@ -432,7 +437,9 @@ int main(int argc, char** argv) {
     z_n = 80;
     eta_n = 1;
 
-
+    // Choosing x,y position in the spacetime for the quasispherical case.
+    x_grid = 0;
+    y_grid = 0;
     /*
 
         INITIAL CONDITIONS ARE A CRITICAL POINT FOR NON ZERO LAMBDA PROBLEM!
@@ -531,12 +538,12 @@ int main(int argc, char** argv) {
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
 
         // Initial conditions for example 2: influenced by exact soln
-        r_curve[0] = example2_Rmax(z_grid[i])/(sqrt(2)*z_grid[i]);
+        r_curve[0] = example2_Rmax(z_grid[i]);
         r_curve[1] = example2_Rprime_init(z_grid[i]);
 
         // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
-        // r_curve[0] = 2*z_grid[i];
-        // r_curve[1] = 2;
+        // r_curve[0] = z_grid[i];
+        // r_curve[1] = 1;
 
         // Initial conditions to focus R=0 at a single time instant for all shells ? Maybe
         // r_curve[0] = E2_init_focus_r(z_grid[i],lambda);
@@ -552,7 +559,7 @@ int main(int argc, char** argv) {
         // r_curve[0] = 10*z_grid[i];
 
         // ODE to solve for each initial condition.
-        ode_e2 primordial_bh(z_grid[i],lambda,false);
+        ode_e2 primordial_bh(z_grid[i],lambda,false,x_grid,y_grid);
         boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
         full_solution.push_back(R_sol);
         // std::cout << R_sol[0].size() << std::endl;
@@ -609,8 +616,29 @@ int main(int argc, char** argv) {
        Finding the zeros of the Rprime solution curve, this is C_0 !!
 
     */
-    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
+    // Rescale Y' solution to (R' - RH'/H) = 0 for proper quasispherical shell crossing
+    std::vector<double> Rprime_slice;
+    std::vector<std::vector<double> > Rprime_rescaled;
+    double z_temp, H_temp,Rprime_temp;
 
+    for (int i = 0; i < Rprime_sol.size(); ++i)
+    {
+        z_temp = z_grid[i];
+        H_temp = H(z_temp,x_grid,y_grid);
+        for (int j = 0; j < full_sol_transformed[i].size()-1; ++j)
+        {
+            // std::cout << "i,j = " << i << " " << j << std::endl; 
+            Rprime_temp = Rprime_sol[i][j] - full_sol_transformed[i][j]*Hprime(z_temp,x_grid,y_grid)/H(z_temp,x_grid,y_grid);
+            Rprime_slice.push_back(Rprime_temp);
+
+        }
+        Rprime_rescaled.push_back(Rprime_slice);
+        Rprime_slice.clear();
+    }
+
+
+    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
+    zeros_output(full_sol_transformed, Rprime_rescaled, z_grid, t_sol, "Rprime_rescaled_zeros.dat",lambda);
 
 
 

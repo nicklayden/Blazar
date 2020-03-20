@@ -72,11 +72,10 @@ class ode_e1 {
 
 class ode_e2 {
     public: 
-        ode_e2(double z, double lambda,  bool signflag): m_z(z),m_l(lambda),m_f(signflag) {};
+        ode_e2(double z, double lambda,  bool signflag, double x=0, double y=0): m_z(z),m_l(lambda),m_f(signflag),x(x),y(y) {};
         double m_z,m_l;
         // Fixing to the x=y=0 plane for now.
-        double x=1;
-        double y=1;
+        double x,y;
         bool m_f;
         std::vector<double> full_sol,mu_sol;
         // std::ofstream stats_out.open("stats.dat");
@@ -93,12 +92,14 @@ class ode_e2 {
                 dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
             } else { 
                 // Negative root: Rdot equation
-                // dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
-                // dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
-                
-                // Ydot equations -- full quasispherical problem here.
-                dxdt[0] = -sqrt(2*M(m_z)/(R*pow(H(m_z,x,y),3)) + 2*E(m_z)/(pow(H(m_z,x,y),2)) + m_l*R*R/3. );
+                dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
                 dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
+                
+
+                // WRONG
+                // Ydot equations -- full quasispherical problem here.
+                // dxdt[0] = -sqrt(2*M(m_z)/(R*pow(H(m_z,x,y),3)) + 2*E(m_z)/(pow(H(m_z,x,y),2)) + m_l*R*R/3. );
+                // dxdt[1] = udot_y(Rp,dxdt[0],R);
 
                 // If solving for Y now, need to rescale to get R back!
 
@@ -169,6 +170,28 @@ class ode_e2 {
 
         }
 
+        double udot_y(double u, double rd, double r) {
+            // set fixed values
+            double m,mp,h,hp,e,ep;
+            double a,b,c,d,f,g;
+            m = M(m_z);
+            mp = Mprime(m_z);
+            h = H(m_z,x,y);
+            hp = Hprime(m_z,x,y);
+            e = E(m_z);
+            ep = Eprime(m_z);
+
+            // function terms
+            a = mp/(pow(h,3)*r);
+            b = -3*m*hp/(pow(h,4)*r);
+            c = -m*u/(pow(h,3)*pow(r,2));
+            d = ep/pow(h,2);
+            f = -2*e*hp/pow(h,3);
+            g = m_l*r*u/3;
+
+            return (a+b+c+d+f+g)/rd;   
+        }
+
         double H(double z,double x, double y) {
             double h,a,b,s;
             s = S(z);
@@ -177,7 +200,14 @@ class ode_e2 {
             h = s/2;
             return h*(1. + pow(a,2) + pow(b,2));
         }
+        
+        double Hprime(double z, double x, double y) {
+            return (Sprime(z)*(pow(S(z),2) - x*x - y*y))/(2*pow(S(z),2));
+        }
 
+        double Sprime(double z) {
+            return sqrt(2);
+        }
 
         double S(double z) {
             return sqrt(2)*z;

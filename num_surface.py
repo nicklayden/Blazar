@@ -84,9 +84,9 @@ def mu(rdot,r,z,l):
 # time = np.arange(0,200,0.001)
 time = np.genfromtxt("tsol.dat")
 init = np.genfromtxt("z_out.dat")
-# mu_roots = np.genfromtxt("mu_zeros.dat")
-# app_roots = np.genfromtxt("apparent_zeros.dat")
-# Rprime_roots = np.genfromtxt("Rprime_zeros.dat")
+mu_roots = np.genfromtxt("mu_zeros.dat")
+app_roots = np.genfromtxt("apparent_zeros.dat")
+Rprime_roots = np.genfromtxt("Rprime_zeros.dat")
 # init = np.linspace(1e-4, 1,50 )
 
 
@@ -141,13 +141,13 @@ lam = 1.0
 split = 1.0
 
 # identify the different horizons as a split between them
-# cosmo_mu = mu_roots[mu_roots[:,0] > split]
-# app_mu = mu_roots[mu_roots[:,0] < split]
+cosmo_mu = mu_roots[mu_roots[:,0] > split]
+app_mu = mu_roots[mu_roots[:,0] < split]
 
-# # print(cosmo_mu[-1,1])
+# print(cosmo_mu[-1,1])
 
-# cosmo_a = app_roots[app_roots[:,0] > split]
-# app_a = app_roots[app_roots[:,0] < split]
+cosmo_a = app_roots[app_roots[:,0] > split]
+app_a = app_roots[app_roots[:,0] < split]
 
 # R = 0, z = 1, t = 2, t[i+1]=3, t[N]=4, R[0]=5,  t_c = 6
 dim1 = 2
@@ -175,8 +175,8 @@ for i in range(len(surf_d)):
     slice = np.array(scaled,dtype=float)
     # slice = np.array(surf_d[i][0].split(),dtype=float)
 
-    # t_collapse.append(time[len(slice)-2])
-    # R_initial.append(slice[0])
+    t_collapse.append(time[len(slice)-2])
+    R_initial.append(slice[0])
     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
     try:
         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
@@ -192,16 +192,16 @@ for i in range(len(surf_d)):
 # plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='b',lw=2, label="$R_{AH}$ Formation")
 
 # Apparent Horizon Detectors
-# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
-# plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
+plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
 
 # # Cosmological Horizon Detectors
-# plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 
 
 # Shell Crossing Detector
-# plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='m',label="$C_0 = 0$")
+plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='r',label="$C_0 = 0$")
 
 
 
