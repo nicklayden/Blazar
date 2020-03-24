@@ -18,6 +18,9 @@ import math as m
 def M(z):
     return (z**3)/2.
 
+def Mprime(z):
+    return 1.5*z**2
+
 def zero_2d(dat,x,y):
     for i in range(len(x)):
         for j in range(len(y)-1):
@@ -256,24 +259,33 @@ shell_t  = time[0:len(shell_R)]
 print("z, t(coll - 10 steps), len(R_shell)    ")
 print(init[qq], shell_t[t_index], len(shell_R))
 
-
+l = 4
 z_pos = init[qq]
-x_grid = np.linspace(-5,5,200)
-y_grid = np.linspace(-5,5,200)
+x_grid = np.linspace(-l,l,500)
+y_grid = np.linspace(-l,l,500)
 
 X,Y = np.meshgrid(x_grid,y_grid)
 
+kappa = 8*np.pi
 height = np.zeros((len(x_grid),len(y_grid)))
+ysol = np.zeros((len(x_grid),len(y_grid)))
+density = np.zeros((len(x_grid),len(y_grid)))
 for i in range(len(x_grid)):
     for j in range(len(y_grid)):
-        height[i][j] = np.abs(shell_Rp[t_index] - shell_R[t_index] * Hprimer(z_pos,x_grid[i],y_grid[j])/H(z_pos,x_grid[i],y_grid[j]))
+        y_value = shell_R[t_index]/H(z_pos,x_grid[i],y_grid[j])
+
+        height[i][j] = np.abs((shell_Rp[t_index] - shell_R[t_index] * Hprimer(z_pos,x_grid[i],y_grid[j])/H(z_pos,x_grid[i],y_grid[j]))/H(z_pos,x_grid[i],y_grid[j]))
+        density[i][j]= m.pow(2*Mprime(z_pos)/(kappa*y_value**2 * height[i][j]),-1)
+# rho = 2M'/(8pi Y^2 Y')
+
+
 
 
 df = pd.DataFrame(height,x_grid,y_grid)
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111,projection='3d')
-sb.heatmap(df,vmin=0,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
+sb.heatmap(df,vmin=0,vmax=0.3,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
                  yticklabels=df.index.values.round(2))
 ax.set_xticks([])
 ax.set_yticks([])
