@@ -1,9 +1,14 @@
 from mpl_toolkits import mplot3d
+from mpl_toolkits.mplot3d import axes3d
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import seaborn as sb
+import pandas as pd
 
-
+fig = plt.figure()
+ax = fig.add_subplot(111)
+# ax = fig.add_subplot(111,projection='3d')
 import math as m
 # data = np.genfromtxt("test.dat")
 # R_init = np.genfromtxt("R_init.dat")
@@ -13,6 +18,14 @@ import math as m
 def M(z):
     return (z**3)/2.
 
+def zero_2d(dat,x,y):
+    for i in range(len(x)):
+        for j in range(len(y)-1):
+            aa = dat[i][j]
+            bb = dat[i][j+1]
+            if aa*bb <= 0:
+                print("root!",i,j)
+                ax.scatter(x_grid[i],y_grid[j],0)
 
 
 
@@ -92,9 +105,11 @@ Rprime_roots = np.genfromtxt("Rprime_zeros.dat")
 
 surf = open("test2.dat",'r')
 rprime = open("Rprime.dat",'r')
+yprime = open("Yprime.dat")
 rdot = open("rdot.dat",'r')
 surf_d = []
 rdot_d = []
+yprime_d = []
 rprime_d = []
 for line in surf:
     # line.split()
@@ -103,19 +118,28 @@ for line in rdot:
     rdot_d.append([line])
 for line in rprime:
     rprime_d.append([line])
+for line in yprime:
+    yprime_d.append([line])
+
 
 
 def S( z):
     return np.sqrt(2)*z;
 
-def P( z):
-    return 0;
+def Sp(z):
+    return np.sqrt(2);
 
+def P( z):
+    return 4*z;
+
+def Pp(z):
+    return 4;
 
 def Q( z): 
-    return 0;
+    return 4*z;
 
-
+def Qp(z):
+    return 4;
 
 def H( z, x,  y): 
     s = S(z);
@@ -123,6 +147,34 @@ def H( z, x,  y):
     b = (y-Q(z))/s;
     h = s/2;
     return h*(1. + m.pow(a,2) + m.pow(b,2));
+
+def Hprime(z,x,y):
+    a = np.sqrt(2)
+    b = 2*z*z - x*x - y*y
+    c = 4*z*z
+    return a*b/c
+
+def Hprimeg(z,x,y):
+    Ppz = Pp(z)
+    Qpz = Qp(z)
+    p = P(z)
+    q = Q(z)
+    a = -np.sqrt(2)/(4*z**2)
+    b = -2*Ppz*z*p - 2*Qpz*z*q + Ppz*z*x + Qpz*z*y + p**2 - 2*x*p + q**2 - 2*y*q - 2*z**2 + x*x + y*y
+    return a*b
+
+def Hprimer(z,x,y):
+    a =x-P(z)
+    b = y-Q(z)
+    c = S(z)**2
+    d = S(z)**3
+    sp = Sp(z)
+    pp = Pp(z)
+    qp = Qp(z)
+
+    e = 0.5*sp*(1 + a*a/c + b*b/c) + 0.5*S(z)*(-2*a*pp/c - 2*a*a*sp/d - 2*b*qp/c - 2*b*b*sp/d )
+    return e
+
 
 
 
@@ -168,22 +220,69 @@ zmax = horizon_cutoff(lam)
 R_initial = []
 t_collapse = []
 
-for i in range(len(surf_d)):
-    raw = np.array(surf_d[i][0].split(),dtype=float)
-    scaled = [j for j in raw]
-    # scaled = raw
-    slice = np.array(scaled,dtype=float)
-    # slice = np.array(surf_d[i][0].split(),dtype=float)
+xg = 1
+yg = 1
 
-    t_collapse.append(time[len(slice)-2])
-    R_initial.append(slice[0])
-    # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-    try:
-        plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
-    #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-    except:
-        continue
+# for i in range(int(len(surf_d)/2)):
+#     raw = np.array(surf_d[i][0].split(),dtype=float)
+#     rawp = np.array(rprime_d[i][0].split(),dtype=float)
+#     scaled = [j for j in raw]
+#     yprime_z = []
+#     for j in range(len(raw)):
+#         yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
+#     # scaled = raw
+#     slice = np.array(yprime_z,dtype=float)
+#     # slice = np.array(surf_d[i][0].split(),dtype=float)
 
+#     # t_collapse.append(time[len(slice)-2])
+#     # R_initial.append(slice[0])
+#     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+#     try:
+#         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+#     #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+#     except:
+#         continue
+
+
+
+# Pick the solution along the curve z = 0.625... this is i = 50 in surf
+qq = 50
+t_index = -100
+
+
+shell_R  = np.array(surf_d[qq][0].split(),dtype=float)
+shell_Rp = np.array(rprime_d[qq][0].split(),dtype=float)
+shell_t  = time[0:len(shell_R)]
+print("z, t(coll - 10 steps), len(R_shell)    ")
+print(init[qq], shell_t[t_index], len(shell_R))
+
+
+z_pos = init[qq]
+x_grid = np.linspace(-5,5,200)
+y_grid = np.linspace(-5,5,200)
+
+X,Y = np.meshgrid(x_grid,y_grid)
+
+height = np.zeros((len(x_grid),len(y_grid)))
+for i in range(len(x_grid)):
+    for j in range(len(y_grid)):
+        height[i][j] = np.abs(shell_Rp[t_index] - shell_R[t_index] * Hprimer(z_pos,x_grid[i],y_grid[j])/H(z_pos,x_grid[i],y_grid[j]))
+
+
+df = pd.DataFrame(height,x_grid,y_grid)
+
+# fig = plt.figure()
+# ax = fig.add_subplot(111,projection='3d')
+sb.heatmap(df,vmin=0,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
+                 yticklabels=df.index.values.round(2))
+ax.set_xticks([])
+ax.set_yticks([])
+# sb.set_style("ticks",{"xtick.major.size":8,"ytick.major.size":8})
+# ax.plot_wireframe(X,Y,height)
+# plt.colorbar()
+# plt.plot(shell_t,shell_R)
+
+# zero_2d(height,x_grid,y_grid)
 
 
 # plt.plot(app_mu[:,1],app_mu[:,6])
@@ -192,16 +291,16 @@ for i in range(len(surf_d)):
 # plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='b',lw=2, label="$R_{AH}$ Formation")
 
 # Apparent Horizon Detectors
-plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
-plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
+# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
+# plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
 
-# # Cosmological Horizon Detectors
-plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+# # # Cosmological Horizon Detectors
+# plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 
 
-# Shell Crossing Detector
-plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='r',label="$C_0 = 0$")
+# # Shell Crossing Detector
+# plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='r',label="$C_0 = 0$")
 
 
 
@@ -257,7 +356,7 @@ plt.plot(Rprime_roots[:,dim1],Rprime_roots[:,dim2],lw=2,c='r',label="$C_0 = 0$")
 # plt.scatter(app_roots[:,2],app_roots[:,0],c='r',lw=1.0,marker='x',label="$\Lambda R^3 + 6M - 3R = 0$")
 
 
-plt.grid(True)
+# plt.grid(True)
 # plt.colorbar()
 # plt.xlim(0,12.5)
 # plt.ylim(0,2.8)
@@ -265,13 +364,13 @@ plt.grid(True)
 
 # plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
-plt.title("Apparent Horizon Detection, \n $\Lambda = {0}$".format(lam))
+plt.title("Map of $|Y_{,z}|$ with S(z) = $\sqrt{2}z$, $P(z)=Q(z)=4z $" + "\n $\Lambda = {0}$".format(lam))
 
 
-plt.ylabel("R(t,z)")
-plt.xlabel("Time")
+plt.ylabel("y")
+plt.xlabel("x")
 # plt.yscale("log")
-plt.ylim(0,10)
+# plt.ylim(-2,10)
 # plt.xlim(7.5,8.5)
 plt.legend()
 # plt.colorbar()

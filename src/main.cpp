@@ -163,6 +163,10 @@ inline mp_type alan_ar_test(mp_type r, mp_type k) {
     return alan_f_A(r,k) - alan_f_A(M_PI/2. - r, k); 
 }
 
+inline mp_type alan_ar_test2(mp_type r, mp_type k) {
+    return alan_f_A(M_PI/2. - r, k); 
+}
+
 inline mp_type test_paraboloid(mp_type x, mp_type y) {
     // roots are the circle x^2 + y^2 = 1
     return x*x + y*y - 1.0;
@@ -432,10 +436,10 @@ int main(int argc, char** argv) {
     // grid definitions:
     z_init = 0. +  1e-4;
     z_end = 1.;
-    eta_init = 3.;
-    eta_end = 5.;
+    eta_init = 0.7;
+    eta_end = 1.2;
     z_n = 80;
-    eta_n = 1;
+    eta_n = 80;
 
     // Choosing x,y position in the spacetime for the quasispherical case.
     x_grid = 0;
@@ -477,7 +481,7 @@ int main(int argc, char** argv) {
     // compute_and_save_zero_set(Shellfocus_sing,coarse_domain,"para.dat");
     // compute_and_save_zero_set(alan_theta,coarse_domain,"para.dat");
     // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
-    // compute_and_save_zero_set(alan_ar_test,time_example1,"alan_f.dat");
+    // compute_and_save_zero_set(alan_theta,coarse_domain,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
 
     // compute_and_save_zero_set(gaussian,coarse_domain,"alan_f.dat");
@@ -636,9 +640,9 @@ int main(int argc, char** argv) {
         Rprime_slice.clear();
     }
 
-
+    matrix_to_file3(Rprime_rescaled,"Yprime.dat");
     zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
-    zeros_output(full_sol_transformed, Rprime_rescaled, z_grid, t_sol, "Rprime_rescaled_zeros.dat",lambda);
+    // zeros_output(full_sol_transformed, Rprime_rescaled, z_grid, t_sol, "Rprime_rescaled_zeros.dat",lambda);
 
 
 

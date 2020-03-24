@@ -381,6 +381,8 @@ std::vector<std::vector<T> > removeNAN(std::vector<std::vector<std::vector<T> > 
     
     // Iterate along all solution curves for each z, stop before NaN values appear.
     // Return only the solution curve without NaN values.
+
+    // k in the arguments picks the solution curve of the N-Dim ode to return. i.e. the nth variable solution
     std::vector<std::vector<T> > noNAN; 
     std::vector<T> section;
 
