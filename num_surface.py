@@ -5,21 +5,27 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 import seaborn as sb
 import pandas as pd
+import math as m
+from primordial import *
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
 # ax = fig.add_subplot(111,projection='3d')
-import math as m
+
 # data = np.genfromtxt("test.dat")
 # R_init = np.genfromtxt("R_init.dat")
 # t_vals = np.arange(0,18,0.01)
 # single_curve = []
 # all_curves = []
-def M(z):
-    return (z**3)/2.
 
-def Mprime(z):
-    return 1.5*z**2
+
+# def M(z):
+#     return (z**3)/2.
+
+# def Mprime(z):
+#     return 1.5*z**2
+
+
 
 def zero_2d(dat,x,y):
     for i in range(len(x)):
@@ -126,57 +132,65 @@ for line in yprime:
 
 
 
-def S( z):
-    return np.sqrt(2)*z;
+# def S( z):
+#     return np.sqrt(2)*z;
 
-def Sp(z):
-    return np.sqrt(2);
+# def Sp(z):
+#     return np.sqrt(2);
 
-def P( z):
-    return 4*z;
+# def P( z):
+#     return 4*z;
 
-def Pp(z):
-    return 4;
+# def Pp(z):
+#     return 4;
 
-def Q( z): 
-    return 4*z;
+# def Q( z): 
+#     return 4*z;
 
-def Qp(z):
-    return 4;
+# def Qp(z):
+#     return 4;
 
-def H( z, x,  y): 
-    s = S(z);
-    a = (x-P(z))/s;
-    b = (y-Q(z))/s;
-    h = s/2;
-    return h*(1. + m.pow(a,2) + m.pow(b,2));
+# def H( z, x,  y): 
+#     s = S(z);
+#     a = (x-P(z))/s;
+#     b = (y-Q(z))/s;
+#     h = s/2;
+#     return h*(1. + m.pow(a,2) + m.pow(b,2));
 
-def Hprime(z,x,y):
-    a = np.sqrt(2)
-    b = 2*z*z - x*x - y*y
-    c = 4*z*z
-    return a*b/c
+# def Hprime(z,x,y):
+#     a = np.sqrt(2)
+#     b = 2*z*z - x*x - y*y
+#     c = 4*z*z
+#     return a*b/c
 
-def Hprimeg(z,x,y):
-    Ppz = Pp(z)
-    Qpz = Qp(z)
-    p = P(z)
-    q = Q(z)
-    a = -np.sqrt(2)/(4*z**2)
-    b = -2*Ppz*z*p - 2*Qpz*z*q + Ppz*z*x + Qpz*z*y + p**2 - 2*x*p + q**2 - 2*y*q - 2*z**2 + x*x + y*y
-    return a*b
+# def Hprimeg(z,x,y):
+#     Ppz = Pp(z)
+#     Qpz = Qp(z)
+#     p = P(z)
+#     q = Q(z)
+#     a = -np.sqrt(2)/(4*z**2)
+#     b = -2*Ppz*z*p - 2*Qpz*z*q + Ppz*z*x + Qpz*z*y + p**2 - 2*x*p + q**2 - 2*y*q - 2*z**2 + x*x + y*y
+#     return a*b
 
-def Hprimer(z,x,y):
-    a =x-P(z)
-    b = y-Q(z)
-    c = S(z)**2
-    d = S(z)**3
-    sp = Sp(z)
-    pp = Pp(z)
-    qp = Qp(z)
+# def Hprimer(z,x,y):
+#     a =x-P(z)
+#     b = y-Q(z)
+#     c = S(z)**2
+#     d = S(z)**3
+#     sp = Sp(z)
+#     pp = Pp(z)
+#     qp = Qp(z)
 
-    e = 0.5*sp*(1 + a*a/c + b*b/c) + 0.5*S(z)*(-2*a*pp/c - 2*a*a*sp/d - 2*b*qp/c - 2*b*b*sp/d )
-    return e
+#     e = 0.5*sp*(1 + a*a/c + b*b/c) + 0.5*S(z)*(-2*a*pp/c - 2*a*a*sp/d - 2*b*qp/c - 2*b*b*sp/d )
+#     return e
+
+# def Mbarprime(z,x,y):
+#     # Mb' = M' - 3MH'/H
+#     hp = Hprimer(z,x,y)
+#     h = H(z,x,y)
+#     m = M(z)
+#     mp = Mprime(z)
+#     return mp - 3*m*hp/h
 
 
 
@@ -252,17 +266,26 @@ yg = 1
 qq = 50
 t_index = -100
 
-
+ 
 shell_R  = np.array(surf_d[qq][0].split(),dtype=float)
 shell_Rp = np.array(rprime_d[qq][0].split(),dtype=float)
 shell_t  = time[0:len(shell_R)]
 print("z, t(coll - 10 steps), len(R_shell)    ")
 print(init[qq], shell_t[t_index], len(shell_R))
 
-l = 4
+zp = init[qq]
+Rr = shell_R[qq]
+Rpr = shell_Rp[qq]
+
+
+sc_radius = np.sqrt(m.pow(zp,2)*(Rr - zp*Rpr)/(zp*Rpr + Rr))
+print(sc_radius)
+
+l = 5*sc_radius
+ng = 100
 z_pos = init[qq]
-x_grid = np.linspace(-l,l,500)
-y_grid = np.linspace(-l,l,500)
+x_grid = np.linspace(-l,l,ng)
+y_grid = np.linspace(-l,l,ng)
 
 X,Y = np.meshgrid(x_grid,y_grid)
 
@@ -272,10 +295,18 @@ ysol = np.zeros((len(x_grid),len(y_grid)))
 density = np.zeros((len(x_grid),len(y_grid)))
 for i in range(len(x_grid)):
     for j in range(len(y_grid)):
-        y_value = shell_R[t_index]/H(z_pos,x_grid[i],y_grid[j])
+        xp = x_grid[i]
+        yp = y_grid[j]
+        zp = z_pos
+        R = shell_R[t_index]
+        Rp = shell_Rp[t_index]
+        height[i][j] = np.abs(Yprime(R,Rp,zp,xp,yp))
+        density[i][j] = Density(R,Rp,zp,xp,yp)
 
-        height[i][j] = np.abs((shell_Rp[t_index] - shell_R[t_index] * Hprimer(z_pos,x_grid[i],y_grid[j])/H(z_pos,x_grid[i],y_grid[j]))/H(z_pos,x_grid[i],y_grid[j]))
-        density[i][j]= m.pow(2*Mprime(z_pos)/(kappa*y_value**2 * height[i][j]),-1)
+        # y_value = shell_R[t_index]/H(z_pos,x_grid[i],y_grid[j])
+
+        # height[i][j] = (shell_Rp[t_index] - shell_R[t_index] * Hprime(z_pos,x_grid[i],y_grid[j])/H(z_pos,x_grid[i],y_grid[j]))/H(z_pos,x_grid[i],y_grid[j])
+        # density[i][j]= m.pow(2*Mbarprime(z_pos,x_grid[i],y_grid[j])/(kappa*y_value**2 * height[i][j]),-1)
 # rho = 2M'/(8pi Y^2 Y')
 
 
@@ -285,12 +316,13 @@ df = pd.DataFrame(height,x_grid,y_grid)
 
 # fig = plt.figure()
 # ax = fig.add_subplot(111,projection='3d')
-sb.heatmap(df,vmin=0,vmax=0.3,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
+sb.heatmap(df,vmin=-0.1,vmax=0.1,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
                  yticklabels=df.index.values.round(2))
+ax.plot([0,1],[0,1])
 ax.set_xticks([])
 ax.set_yticks([])
 # sb.set_style("ticks",{"xtick.major.size":8,"ytick.major.size":8})
-# ax.plot_wireframe(X,Y,height)
+# ax.plot_wireframe(X,Y,density)
 # plt.colorbar()
 # plt.plot(shell_t,shell_R)
 

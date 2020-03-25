@@ -31,8 +31,17 @@ data_z  = np.genfromtxt("z_out.dat")
 # Construct dataframes and panels of the data
 #
 # convert None type values or NaN types to R=0 for R solutions
-df_r = pd.DataFrame(data_rt,data_z,columns=t)
-sb.plot_wireframe(df_r,robust=True)
-plt.show()
+# df_r = pd.DataFrame(data_rt,data_z,columns=t)
+# sb.plot_wireframe(df_r,robust=True)
+# plt.show()
 # print(df_r)
  
+
+#########
+# Animation of the Y(t,r=c,x,y) function as a heatmap
+#
+# Indices for the z=constant surface and a starting point in time
+t_i = 1000
+z_i = 50
+
+
