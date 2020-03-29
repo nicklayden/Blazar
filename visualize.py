@@ -19,6 +19,15 @@ def load_data(file):
         data.append(row)
     return data
 
+def zero_2d(dat,x,y):
+    roots = []
+    for i in range(len(x)):
+        for j in range(len(y)-1):
+            aa = dat[i][j]
+            bb = dat[i][j+1]
+            if aa*bb <= 0:
+                roots.append([x_g[i],y_g[j]])
+    return roots
 
 def surface(f,xg,yg,R,Rp,z):
     # Compute the surface on the x-y plane 
@@ -30,6 +39,13 @@ def surface(f,xg,yg,R,Rp,z):
             result[i][j] = f(R,Rp,z,xg[i],yg[j])
     return result
 
+def sc_radius(R,Rp,z):
+    # Compute the shell crossing radius for a given shell
+    # This assume P=Q=0, S=z, S'=1
+    a = R - Rp*z
+    b = R + Rp*z
+    c = z*z
+    return np.sqrt((a*c)/(b))
 
 ##########
 # Loading all data from simulations, R', R, Rdot, Y', z, t
@@ -58,10 +74,10 @@ df_r  = pd.DataFrame(data_r ,data_z,columns=t)
 # Animation of the Y(t,r=c,x,y) function as a heatmap
 #
 # Indices for the z=constant surface and a starting point in time
-t_i = 10
-z_i = 50
+t_i = 4000
+z_i = 5
 a = 1
-N = 100
+N = 300
 
 zp = data_z[z_i]
 R  = df_r.iloc[z_i][t[t_i]]
@@ -71,17 +87,32 @@ x_g = np.linspace(-a,a,N)
 y_g = np.linspace(-a,a,N)
 
 y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
+roots = zero_2d(y_surf,x_g,y_g)
 
-df_surf = pd.DataFrame(y_surf,y_g,columns=x_g)
+print("R = ", R)
+print("R'= ", Rp)
+print("z = ", zp)
+# print("Calculated SC radius: ", sc_radius(R,Rp,zp))
+# print("Root finder result", np.sqrt(roots[0][0]**2 + roots[0][1]**2))
 
-sb.heatmap(df_surf)
-plt.show()
+# df_surf = pd.DataFrame(y_surf,y_g,columns=x_g)
 
-# .iloc[i] grabs the ith row in a DataFrame
-# for i in range(80):
-#     plt.plot(t,df_r.iloc[i])
-# plt.ylim(0,10)
+# sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
 # plt.show()
+
+for z_i in range(80):
+    sc_detect = []
+    for i in range(len(data_r[z_i])):
+        sc_detect.append(data_r[z_i][i] - data_rz[z_i][i]*zp)
+
+
+    # .iloc[i] grabs the ith row in a DataFrame
+    # for i in range(80):
+    plt.plot(t[0:len(sc_detect)],sc_detect)
+    # plt.plot(t,df_r.iloc[z_i])
+plt.ylim(-10,10)    
+plt.grid(True)
+plt.show()
 
 
 #########
