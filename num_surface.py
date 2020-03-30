@@ -132,68 +132,6 @@ for line in yprime:
 
 
 
-# def S( z):
-#     return np.sqrt(2)*z;
-
-# def Sp(z):
-#     return np.sqrt(2);
-
-# def P( z):
-#     return 4*z;
-
-# def Pp(z):
-#     return 4;
-
-# def Q( z): 
-#     return 4*z;
-
-# def Qp(z):
-#     return 4;
-
-# def H( z, x,  y): 
-#     s = S(z);
-#     a = (x-P(z))/s;
-#     b = (y-Q(z))/s;
-#     h = s/2;
-#     return h*(1. + m.pow(a,2) + m.pow(b,2));
-
-# def Hprime(z,x,y):
-#     a = np.sqrt(2)
-#     b = 2*z*z - x*x - y*y
-#     c = 4*z*z
-#     return a*b/c
-
-# def Hprimeg(z,x,y):
-#     Ppz = Pp(z)
-#     Qpz = Qp(z)
-#     p = P(z)
-#     q = Q(z)
-#     a = -np.sqrt(2)/(4*z**2)
-#     b = -2*Ppz*z*p - 2*Qpz*z*q + Ppz*z*x + Qpz*z*y + p**2 - 2*x*p + q**2 - 2*y*q - 2*z**2 + x*x + y*y
-#     return a*b
-
-# def Hprimer(z,x,y):
-#     a =x-P(z)
-#     b = y-Q(z)
-#     c = S(z)**2
-#     d = S(z)**3
-#     sp = Sp(z)
-#     pp = Pp(z)
-#     qp = Qp(z)
-
-#     e = 0.5*sp*(1 + a*a/c + b*b/c) + 0.5*S(z)*(-2*a*pp/c - 2*a*a*sp/d - 2*b*qp/c - 2*b*b*sp/d )
-#     return e
-
-# def Mbarprime(z,x,y):
-#     # Mb' = M' - 3MH'/H
-#     hp = Hprimer(z,x,y)
-#     h = H(z,x,y)
-#     m = M(z)
-#     mp = Mprime(z)
-#     return mp - 3*m*hp/h
-
-
-
 
 horz_r = []
 horz_t = []
@@ -312,15 +250,15 @@ for i in range(len(x_grid)):
 
 
 
-df = pd.DataFrame(height,x_grid,y_grid)
+# df = pd.DataFrame(height,x_grid,y_grid)
 
-# fig = plt.figure()
-# ax = fig.add_subplot(111,projection='3d')
-sb.heatmap(df,vmin=-0.1,vmax=0.1,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
-                 yticklabels=df.index.values.round(2))
-ax.plot([0,1],[0,1])
-ax.set_xticks([])
-ax.set_yticks([])
+# # fig = plt.figure()
+# # ax = fig.add_subplot(111,projection='3d')
+# sb.heatmap(df,vmin=-0.1,vmax=0.1,cmap='coolwarm',fmt='.1f',xticklabels=df.columns.values.round(2),
+#                  yticklabels=df.index.values.round(2))
+# ax.plot([0,1],[0,1])
+# ax.set_xticks([])
+# ax.set_yticks([])
 # sb.set_style("ticks",{"xtick.major.size":8,"ytick.major.size":8})
 # ax.plot_wireframe(X,Y,density)
 # plt.colorbar()
@@ -335,12 +273,12 @@ ax.set_yticks([])
 # plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='b',lw=2, label="$R_{AH}$ Formation")
 
 # Apparent Horizon Detectors
-# plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
-# plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
+plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
 
 # # # Cosmological Horizon Detectors
-# plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-# plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 
 
 # # Shell Crossing Detector

@@ -503,8 +503,8 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 20;
-    double dt = 0.001;
+    double t_end = 1;
+    double dt = 0.0001;
     double lambda =1.;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
@@ -542,12 +542,12 @@ int main(int argc, char** argv) {
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
 
         // Initial conditions for example 2: influenced by exact soln
-        r_curve[0] = example2_Rmax(z_grid[i]);
-        r_curve[1] = example2_Rprime_init(z_grid[i]);
+        // r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[1] = example2_Rprime_init(z_grid[i]);
 
         // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
-        // r_curve[0] = z_grid[i];
-        // r_curve[1] = 1;
+        r_curve[0] = pow(z_grid[i],2)/2.;
+        r_curve[1] = z_grid[i];
 
         // Initial conditions to focus R=0 at a single time instant for all shells ? Maybe
         // r_curve[0] = E2_init_focus_r(z_grid[i],lambda);

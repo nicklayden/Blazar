@@ -59,39 +59,39 @@ time    = np.genfromtxt("tsol.dat")
 data_z  = np.genfromtxt("z_out.dat")
 
 t = np.linspace(0,20,20001)
-
+print(len(data_r[1]))
 
 ##########
 # Construct dataframes and panels of the data
 #
 # convert None type values or NaN types to R=0 for R solutions
-df_rt = pd.DataFrame(data_rt,data_z,columns=t)
-df_rz = pd.DataFrame(data_rz,data_z,columns=t)
-df_r  = pd.DataFrame(data_r ,data_z,columns=t)
+# df_rt = pd.DataFrame(data_rt,data_z,columns=time)
+# df_rz = pd.DataFrame(data_rz,data_z,columns=time)
+# df_r  = pd.DataFrame(data_r ,data_z,columns=time)
  
 
 #########
 # Animation of the Y(t,r=c,x,y) function as a heatmap
 #
 # Indices for the z=constant surface and a starting point in time
-t_i = 4000
-z_i = 5
-a = 1
-N = 300
+# t_i = 4000
+# z_i = 5
+# a = 1
+# N = 300
 
-zp = data_z[z_i]
-R  = df_r.iloc[z_i][t[t_i]]
-Rp = df_rz.iloc[z_i][t[t_i]]
+# zp = data_z[z_i]
+# R  = df_r.iloc[z_i][t[t_i]]
+# Rp = df_rz.iloc[z_i][t[t_i]]
 
-x_g = np.linspace(-a,a,N)
-y_g = np.linspace(-a,a,N)
+# x_g = np.linspace(-a,a,N)
+# y_g = np.linspace(-a,a,N)
 
-y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
-roots = zero_2d(y_surf,x_g,y_g)
+# y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
+# roots = zero_2d(y_surf,x_g,y_g)
 
-print("R = ", R)
-print("R'= ", Rp)
-print("z = ", zp)
+# print("R = ", R)
+# print("R'= ", Rp)
+# print("z = ", zp)
 # print("Calculated SC radius: ", sc_radius(R,Rp,zp))
 # print("Root finder result", np.sqrt(roots[0][0]**2 + roots[0][1]**2))
 
@@ -100,17 +100,28 @@ print("z = ", zp)
 # sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
 # plt.show()
 
-for z_i in range(80):
-    sc_detect = []
-    for i in range(len(data_r[z_i])):
-        sc_detect.append(data_r[z_i][i] - data_rz[z_i][i]*zp)
+# for z_i in range(80):
+#     sc_detect = []
+#     for i in range(len(data_r[z_i])):
+#         sc_detect.append(data_r[z_i][i] - data_rz[z_i][i]*zp)
 
 
-    # .iloc[i] grabs the ith row in a DataFrame
-    # for i in range(80):
-    plt.plot(t[0:len(sc_detect)],sc_detect)
-    # plt.plot(t,df_r.iloc[z_i])
-plt.ylim(-10,10)    
+#     # .iloc[i] grabs the ith row in a DataFrame
+#     # for i in range(80):
+#     plt.plot(t[0:len(sc_detect)],sc_detect)
+#     # plt.plot(t,df_r.iloc[z_i])
+
+# for tt in range(230):
+#     rrp = []
+#     for i in range(80):
+#         rrp.append(data_r[i][tt]/data_rz[i][tt])
+#     plt.plot(data_z,rrp,lw=0.5)
+for i in range(80):
+    plt.plot(time[0:len(data_r[i])],data_r[i])
+
+# plt.plot(data_z,data_z,lw=1)
+plt.ylim(0,1)
+plt.xlim(0,1)
 plt.grid(True)
 plt.show()
 
