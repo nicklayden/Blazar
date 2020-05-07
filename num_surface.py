@@ -143,7 +143,8 @@ inv_t = []
 
 # lam = m.pow(2./(3.*m.pow(1.0,3)),2);
 lam = 1.0
-# print("Maximum horizon formation point ",horizon_cutoff(lam))
+# print("Maximum horizon formation point ",horizon_cutoff(lam))p_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
+plt.plot(app_a[:,dim1],app
 
 split = 1.0
 

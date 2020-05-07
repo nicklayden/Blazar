@@ -20,6 +20,7 @@ def load_data(file):
     return data
 
 def zero_2d(dat,x,y):
+    # Rudimentary quick root check
     roots = []
     for i in range(len(x)):
         for j in range(len(y)-1):
@@ -58,47 +59,47 @@ data_r  = load_data("test2.dat")
 time    = np.genfromtxt("tsol.dat")
 data_z  = np.genfromtxt("z_out.dat")
 
-t = np.linspace(0,20,20001)
+t = np.linspace(0,20,200001)
 print(len(data_r[1]))
 
 ##########
 # Construct dataframes and panels of the data
 #
 # convert None type values or NaN types to R=0 for R solutions
-# df_rt = pd.DataFrame(data_rt,data_z,columns=time)
-# df_rz = pd.DataFrame(data_rz,data_z,columns=time)
-# df_r  = pd.DataFrame(data_r ,data_z,columns=time)
+df_rt = pd.DataFrame(data_rt,data_z,columns=t)
+df_rz = pd.DataFrame(data_rz,data_z,columns=t)
+df_r  = pd.DataFrame(data_r ,data_z,columns=t)
  
 
 #########
 # Animation of the Y(t,r=c,x,y) function as a heatmap
 #
 # Indices for the z=constant surface and a starting point in time
-# t_i = 4000
-# z_i = 5
-# a = 1
-# N = 300
+t_i = 4000
+z_i = 5
+a = 1
+N = 100
 
-# zp = data_z[z_i]
-# R  = df_r.iloc[z_i][t[t_i]]
-# Rp = df_rz.iloc[z_i][t[t_i]]
+zp = data_z[z_i]
+R  = df_r.iloc[z_i][t[t_i]]
+Rp = df_rz.iloc[z_i][t[t_i]]
 
-# x_g = np.linspace(-a,a,N)
-# y_g = np.linspace(-a,a,N)
+x_g = np.linspace(-a,a,N)
+y_g = np.linspace(-a,a,N)
 
-# y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
+y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
 # roots = zero_2d(y_surf,x_g,y_g)
 
-# print("R = ", R)
-# print("R'= ", Rp)
-# print("z = ", zp)
-# print("Calculated SC radius: ", sc_radius(R,Rp,zp))
+print("R = ", R)
+print("R'= ", Rp)
+print("z = ", zp)
+print("Calculated SC radius: ", sc_radius(R,Rp,zp))
 # print("Root finder result", np.sqrt(roots[0][0]**2 + roots[0][1]**2))
 
-# df_surf = pd.DataFrame(y_surf,y_g,columns=x_g)
+df_surf = pd.DataFrame(y_surf,y_g,columns=x_g)
 
-# sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
-# plt.show()
+sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
+plt.show()
 
 # for z_i in range(80):
 #     sc_detect = []
@@ -116,14 +117,25 @@ print(len(data_r[1]))
 #     for i in range(80):
 #         rrp.append(data_r[i][tt]/data_rz[i][tt])
 #     plt.plot(data_z,rrp,lw=0.5)
-for i in range(80):
-    plt.plot(time[0:len(data_r[i])],data_r[i])
 
-# plt.plot(data_z,data_z,lw=1)
-plt.ylim(0,1)
-plt.xlim(0,1)
-plt.grid(True)
-plt.show()
+
+####
+# Plot shell collapse solution curves
+#
+
+# for i in range(0,80):
+#     try:
+#         plt.plot(time[0:len(data_r[i])],data_r[i], )
+#     except ValueError:
+#         print(i, "had a ValueError, array size mismatch.")
+#         continue
+# # plt.plot(data_z,data_z,lw=1)
+
+
+# plt.ylim(0,10)
+# # plt.xlim(0,20)
+# plt.grid(True)
+# plt.show()
 
 
 #########
