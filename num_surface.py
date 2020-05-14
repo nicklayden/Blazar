@@ -144,7 +144,7 @@ inv_t = []
 # lam = m.pow(2./(3.*m.pow(1.0,3)),2);
 lam = 1.0
 # print("Maximum horizon formation point ",horizon_cutoff(lam))p_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
-plt.plot(app_a[:,dim1],app
+# plt.plot(app_a[:,dim1],app)
 
 split = 1.0
 
@@ -179,25 +179,25 @@ t_collapse = []
 xg = 1
 yg = 1
 
-# for i in range(int(len(surf_d)/2)):
-#     raw = np.array(surf_d[i][0].split(),dtype=float)
-#     rawp = np.array(rprime_d[i][0].split(),dtype=float)
-#     scaled = [j for j in raw]
-#     yprime_z = []
-#     for j in range(len(raw)):
-#         yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
-#     # scaled = raw
-#     slice = np.array(yprime_z,dtype=float)
-#     # slice = np.array(surf_d[i][0].split(),dtype=float)
+for i in range(int(len(surf_d))):
+    raw = np.array(surf_d[i][0].split(),dtype=float)
+    rawp = np.array(rprime_d[i][0].split(),dtype=float)
+    scaled = [j for j in raw]
+    yprime_z = []
+    # for j in range(len(raw)):
+    #     yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
+    # scaled = raw
+    slice = np.array(raw,dtype=float)
+    # slice = np.array(surf_d[i][0].split(),dtype=float)
 
-#     # t_collapse.append(time[len(slice)-2])
-#     # R_initial.append(slice[0])
-#     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-#     try:
-#         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
-#     #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-#     except:
-#         continue
+    # t_collapse.append(time[len(slice)-2])
+    # R_initial.append(slice[0])
+    # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+    #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+    except:
+        continue
 
 
 
@@ -278,8 +278,8 @@ plt.plot(app_mu[:,dim1],app_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
 plt.plot(app_a[:,dim1],app_a[:,dim2], ls=":",c='k',lw=2.0,label="$\Lambda R^3 + 6M - 3R = 0$")
 
 # # # Cosmological Horizon Detectors
-plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0, label="$\Lambda R^3 + 6M - 3R = 0$")
-plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
+plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0)#, label="$\Lambda R^3 + 6M - 3R = 0$")
+plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0)# ,  label="$\mu = 0 $")
 
 
 # # Shell Crossing Detector
@@ -348,14 +348,16 @@ plt.plot(cosmo_mu[:,dim1],cosmo_mu[:,dim2],c='r',lw=2.0, label="$\mu = 0 $")
 # plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
 plt.title("Map of $|Y_{,z}|$ with S(z) = $\sqrt{2}z$, $P(z)=Q(z)=4z $" + "\n $\Lambda = {0}$".format(lam))
+plt.title("Formation of Cosmological and Apparent Horizons \n $\Lambda = 1.0$")
 
 
-plt.ylabel("y")
-plt.xlabel("x")
+
+plt.ylabel("R(t,z)")
+plt.xlabel("time")
 # plt.yscale("log")
-# plt.ylim(-2,10)
-# plt.xlim(7.5,8.5)
-plt.legend()
+plt.ylim(0,2)
+plt.xlim(0,9)
+plt.legend(loc="lower left")
 # plt.colorbar()
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))

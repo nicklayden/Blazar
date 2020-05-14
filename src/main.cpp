@@ -438,7 +438,7 @@ int main(int argc, char** argv) {
     z_end = 1.;
     eta_init = 0.7;
     eta_end = 1.2;
-    z_n = 80;
+    z_n = 600;
     eta_n = 80;
 
     // Choosing x,y position in the spacetime for the quasispherical case.
@@ -504,7 +504,7 @@ int main(int argc, char** argv) {
     // Initial Conditions and parameter values
     double t_start = 0;
     double t_end = 20;
-    double dt = 0.0001;
+    double dt = 0.001;
     double lambda =1.;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 

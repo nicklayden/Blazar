@@ -71,7 +71,6 @@ def Hprime(z,x,y):
 # And M_tilde which is scaled by H
 # including derivative M'
 # These terms differ by problem definitions
-
 # Primordial black hole formation
 def M(z):
 	return (z**3)/2
@@ -90,6 +89,16 @@ def Mbarprime(z,x,y):
     m = M(z)
     mp = Mprime(z)
     return mp - 3*m*hp/h
+
+###############################################################################
+# Energy function E(z) 
+# Model D from Harada and Jhingan 2015
+# Parameters n1,n2 > 2, rw=1, rc = 0.8-10
+#
+#
+def E(z):
+    return 0;
+
 
 
 ###############################################################################

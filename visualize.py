@@ -59,16 +59,16 @@ data_r  = load_data("test2.dat")
 time    = np.genfromtxt("tsol.dat")
 data_z  = np.genfromtxt("z_out.dat")
 
-t = np.linspace(0,20,200001)
+# t = np.linspace(0,20,200001)
 print(len(data_r[1]))
 
 ##########
 # Construct dataframes and panels of the data
 #
 # convert None type values or NaN types to R=0 for R solutions
-df_rt = pd.DataFrame(data_rt,data_z,columns=t)
-df_rz = pd.DataFrame(data_rz,data_z,columns=t)
-df_r  = pd.DataFrame(data_r ,data_z,columns=t)
+df_rt = pd.DataFrame(data_rt,data_z,columns=time)
+df_rz = pd.DataFrame(data_rz,data_z,columns=time)
+df_r  = pd.DataFrame(data_r ,data_z,columns=time)
  
 
 #########
@@ -81,8 +81,8 @@ a = 1
 N = 100
 
 zp = data_z[z_i]
-R  = df_r.iloc[z_i][t[t_i]]
-Rp = df_rz.iloc[z_i][t[t_i]]
+R  = df_r.iloc[z_i][time[t_i]]
+Rp = df_rz.iloc[z_i][time[t_i]]
 
 x_g = np.linspace(-a,a,N)
 y_g = np.linspace(-a,a,N)
@@ -96,7 +96,7 @@ print("z = ", zp)
 print("Calculated SC radius: ", sc_radius(R,Rp,zp))
 # print("Root finder result", np.sqrt(roots[0][0]**2 + roots[0][1]**2))
 
-df_surf = pd.DataFrame(y_surf,y_g,columns=x_g)
+df_surf = pd.DataFrame(y_surf)
 
 sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
 plt.show()
