@@ -503,7 +503,7 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 20;
+    double t_end = 30;
     double dt = 0.001;
     double lambda =0.443;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
