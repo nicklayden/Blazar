@@ -97,7 +97,7 @@ def Mbarprime(z,x,y):
 #
 #
 def E(z):
-    return 0;
+    return 0; 
 
 
 
@@ -134,9 +134,21 @@ def Density(R,Rp,z,x,y):
 	return a/(b*c*d)
 
 
+###############################################################################
+# Cartan Invariants used as horizon detectors
+#
+# rho and mu
+#
+#
 
 
-
+def mu(rd,r,E):
+    # Cartan invariant mu. Collapsing phase horizon detector.
+    # rd = R,t
+    # r  = R
+    # E  = E(z)
+    a = rd - np.sqrt(1-2*E)
+    return -np.sqrt(2)*a/(2*r)
 
 
 

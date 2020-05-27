@@ -201,6 +201,10 @@ inline double energy_e2(double z) {
     return a*d;
 }
 
+inline double energy_e11(double z) {
+    return -pow(0.8e1, 0.2e1 / 0.3e1) * pow(0.3141592654e1 * z, 0.2e1 / 0.3e1) * pow(0.4e1, 0.1e1 / 0.3e1) * pow(0.1e0 * pow(z, 0.3e1) + 0.5000e4 * z * z + 0.125e2, -0.2e1 / 0.3e1) / 0.8e1;
+}
+
 inline double mass_e2(double z) {
     return pow(z,3)/2.;
     // double lambda = 0.1;
@@ -226,13 +230,24 @@ inline double example2_Rprime_init(double z) {
 
 
 inline double Rdot(double r, double z, double lambda) {
+    // CGECK THIS
     double a;
     a = 2*energy_e2(z) + 2*mass_e2(z)/r + lambda*r*r/3.;
     return -sqrt(a);
 }
 
+
+inline double Rdot_e1(double r, double z, double lambda) {
+    // CGECK THIS
+    double a;
+    a = 2.*energy_e11(z) + (2.*z)/r + lambda*r*r/3.;
+    return -sqrt(a);
+}
+
+
 double mu_example2(double rdot, double r, double energy) {
-    // Extended Cartan invariant that detects the horizon
+    // Extended Cartan invariant that detects the horizon.
+    // Generalized to fit examples 1 and 2.
     double a,b,c;
     a = sqrt(1 + 2*energy);
     b = rdot + a;
@@ -240,11 +255,28 @@ double mu_example2(double rdot, double r, double energy) {
     return -c/sqrt(2.0);
 }
 
+double rho_example2(double rdot, double r, double energy) {
+    // Extended Cartan invariant that detects the horizon
+    double a,b,c;
+    a = sqrt(1 + 2*energy);
+    b = rdot - a;
+    c = b/r;
+    return c/sqrt(2.0);
+}
+
 double apparent_horizon(double R, double z, double lambda) {
     // Debnath Nath Chakraborty 2006 paper equaiton 25
     // Requires mass for EXAMPLE 2
     return lambda*pow(R,3) + 6*mass_e2(z) - 3*R;
 }
+
+
+double apparent_horizon_e1(double R, double z, double lambda) {
+    // Debnath Nath Chakraborty 2006 paper equaiton 25
+    // Requires mass for EXAMPLE 2
+    return lambda*pow(R,3) + 6*z - 3*R;
+}
+
 
 double integrand(double R, double z, double lambda) {
 	// Integral of evolution equation for t_collapse time
@@ -388,7 +420,7 @@ inline mp_type Shellfocus_sing(mp_type z, mp_type p) {
 int main(int argc, char** argv) {
 
     // input file streams
-    std::ifstream r_init("R_init.dat");
+    std::ifstream r_init("Example1/R_init.dat");
 
     // output file streams
     std::ofstream test_num_sol,test2, rdot_f,tsol_f;
@@ -396,8 +428,8 @@ int main(int argc, char** argv) {
     std::ofstream alan_roots;
     alan_roots.open("alanroots.dat");
     
-    // std::vector<std::vector<double> > file_input;
-    // file_input = read_file(r_init);
+    std::vector<std::vector<double> > file_input;
+    file_input = read_file(r_init);
 
     test_num_sol.open("test.dat");
     test2.open("test2.dat");
@@ -410,11 +442,11 @@ int main(int argc, char** argv) {
      * 
      * Solving the exact system at t=0 for example 1
     ************************************************************************************/
-    std::vector<std::vector<mp_type> > init_conds_zeta, initial_data, domain;
-    std::vector<mp_type> r_init_conds, data_slice;
+    std::vector<std::vector<double> > init_conds_zeta, initial_data, domain;
+    std::vector<double> r_init_conds, data_slice;
 
 
-
+    // Best way is the compute the zero set directly inside the program. This may take a while.
     // init_conds = compute_zero_set_func(eta_eq);
 
     // for (size_t i = 0; i < 10; i++)
@@ -438,7 +470,7 @@ int main(int argc, char** argv) {
     z_end = 1.;
     eta_init = 0.7;
     eta_end = 1.2;
-    z_n = 600;
+    z_n = 60;
     eta_n = 80;
 
     // Choosing x,y position in the spacetime for the quasispherical case.
@@ -503,9 +535,9 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 30;
-    double dt = 0.001;
-    double lambda =0.443;// pow(2./(3.*pow(1.0,3)),2);
+    double t_end = 20;
+    double dt = 0.0001;
+    double lambda =0.001;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
@@ -532,18 +564,19 @@ int main(int argc, char** argv) {
 		// Rtemp = R0 + i*(RN-R0)/num_R;
   //   	t_ah << integrand(Rtemp,z_grid[10],lambda) << std::endl;
   //   }
-
+    double z_value;
     std::cout << "Calculating solution curve for i= " << std::endl;
     // Looping through all initial conditions to get a series of solution curves in the z space.
-    for (size_t i = 0; i < z_grid.size(); i++)
+    for (size_t i = 0; i < file_input.size(); i++)
     {
         // Initial conditions for example 1:
-        // r_curve[0] = file_input[i][1];
+        r_curve[0] = file_input[i][1];
+        z_value = file_input[i][0];
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
 
         // Initial conditions for example 2: influenced by exact soln
-        r_curve[0] = example2_Rmax(z_grid[i]);
-        r_curve[1] = example2_Rprime_init(z_grid[i]);
+        // r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[1] = example2_Rprime_init(z_grid[i]);
 
         // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
         // r_curve[0] = pow(z_grid[i],2)/2.;
@@ -562,11 +595,17 @@ int main(int argc, char** argv) {
         // r_curve[0] = zero_force_init(z_grid[i],lambda);
         // r_curve[0] = 10*z_grid[i];
 
-        // ODE to solve for each initial condition.
-        ode_e2 primordial_bh(z_grid[i],lambda,false,x_grid,y_grid);
-        boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        // ODE to solve for each initial condition. PBH Formation!
+        // ode_e2 primordial_bh(z_grid[i],lambda,false,x_grid,y_grid);
+        // boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        // full_solution.push_back(R_sol);
+        
+        // ODE Example 1 GBH Formation.
+        ode_e1 galactic_bh(z_value,lambda,false);
+        boost::numeric::odeint::integrate_const(stepper,galactic_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
         full_solution.push_back(R_sol);
-        // std::cout << R_sol[0].size() << std::endl;
+
+
         R_sol.clear();
 
 
@@ -585,25 +624,31 @@ int main(int argc, char** argv) {
     */
 
     std::cout << "Calculating Horizon and Shell Crossing Detectors" << std::endl;
+    std::cout << "Check the functions used across examples!!" << std::endl;
 
     std::vector<std::vector<double> > mu_sol, rho_sol,app_sol;
     std::vector<double> mu_slice, rho_slice, app_slice;
-    double rdot_i, e_i, r_i,mu_i,app_i;
+    double rdot_i, e_i, r_i,mu_i,app_i,z_i;
     // Output some extra things like rho and mu
+    std::cout << full_sol_transformed.size() << std::endl;
     for (int i = 0; i < full_sol_transformed.size(); ++i)
     {
 
         for (int j = 0; j < full_sol_transformed[i].size(); ++j)
         {
-            rdot_i = Rdot(full_sol_transformed[i][j],z_grid[i],lambda);
+            z_i = file_input[i][0];
             r_i = full_sol_transformed[i][j];
-            e_i = energy_e2(z_grid[i]);
+            rdot_i = Rdot_e1(r_i,z_i,lambda);
+            
+
+            // Change energy_e2 to energy_e1 for proper analysis.
+            e_i = energy_e11(z_i);
             mu_i = mu_example2(rdot_i,r_i,e_i);
-            // mu_i = apparent_horizon(r_i,z_grid[i],lambda);
-            // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],z_grid[i],lambda));
+            // mu_i = apparent_horizon(r_i,file_input[i][0],lambda);
+            // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],file_input[i][0],lambda));
             mu_slice.push_back(mu_i);
 
-            app_i = apparent_horizon(r_i,z_grid[i],lambda);
+            app_i = apparent_horizon_e1(r_i,z_i,lambda);
             app_slice.push_back(app_i);
         }
         mu_sol.push_back(mu_slice);
@@ -611,37 +656,36 @@ int main(int argc, char** argv) {
         app_sol.push_back(app_slice);
         app_slice.clear();
     }
-    // std::cout << "Wtf1" << std::endl;
     zeros_output(full_sol_transformed, mu_sol,z_grid,t_sol,"mu_zeros.dat",lambda);
     zeros_output(full_sol_transformed, app_sol,z_grid,t_sol,"apparent_zeros.dat",lambda);
     matrix_to_file3(mu_sol,"rdot.dat");
 
      /*
-       Finding the zeros of the Rprime solution curve, this is C_0 !!
+       Finding the zeros of the Rprime solution curve, this is C_4 !!
 
     */
     // Rescale Y' solution to (R' - RH'/H) = 0 for proper quasispherical shell crossing
-    std::vector<double> Rprime_slice;
-    std::vector<std::vector<double> > Rprime_rescaled;
-    double z_temp, H_temp,Rprime_temp;
+    // std::vector<double> Rprime_slice;
+    // std::vector<std::vector<double> > Rprime_rescaled;
+    // double z_temp, H_temp,Rprime_temp;
 
-    for (int i = 0; i < Rprime_sol.size(); ++i)
-    {
-        z_temp = z_grid[i];
-        H_temp = H(z_temp,x_grid,y_grid);
-        for (int j = 0; j < full_sol_transformed[i].size()-1; ++j)
-        {
-            // std::cout << "i,j = " << i << " " << j << std::endl; 
-            Rprime_temp = Rprime_sol[i][j] - full_sol_transformed[i][j]*Hprime(z_temp,x_grid,y_grid)/H(z_temp,x_grid,y_grid);
-            Rprime_slice.push_back(Rprime_temp);
+    // for (int i = 0; i < Rprime_sol.size(); ++i)
+    // {
+    //     z_temp = z_grid[i];
+    //     H_temp = H(z_temp,x_grid,y_grid);
+    //     for (int j = 0; j < full_sol_transformed[i].size()-1; ++j)
+    //     {
+    //         // std::cout << "i,j = " << i << " " << j << std::endl; 
+    //         Rprime_temp = Rprime_sol[i][j] - full_sol_transformed[i][j]*Hprime(z_temp,x_grid,y_grid)/H(z_temp,x_grid,y_grid);
+    //         Rprime_slice.push_back(Rprime_temp);
 
-        }
-        Rprime_rescaled.push_back(Rprime_slice);
-        Rprime_slice.clear();
-    }
+    //     }
+    //     Rprime_rescaled.push_back(Rprime_slice);
+    //     Rprime_slice.clear();
+    // }
 
-    matrix_to_file3(Rprime_rescaled,"Yprime.dat");
-    zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
+    // matrix_to_file3(Rprime_rescaled,"Yprime.dat");
+    // zeros_output(full_sol_transformed, Rprime_sol,z_grid,t_sol,"Rprime_zeros.dat",lambda);
     // zeros_output(full_sol_transformed, Rprime_rescaled, z_grid, t_sol, "Rprime_rescaled_zeros.dat",lambda);
 
 
@@ -753,7 +797,6 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::v
     matrix_to_file(zero_set,outfile);
 
 }
-
 
 std::vector<std::vector<double> > read_file(std::ifstream& input) {
     // Important note: This reads across rows, then columns, stores nxn array into nx1.

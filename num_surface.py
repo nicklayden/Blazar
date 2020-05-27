@@ -36,7 +36,10 @@ def zero_2d(dat,x,y):
                 print("root!",i,j)
                 ax.scatter(x_grid[i],y_grid[j],0)
 
-
+def Rdot_e1(r,z,l):
+    # Rdot for example 1. Check mass function.
+    # let z = M
+    return 
 
 def R1_debnath(z,lam):
 
@@ -53,6 +56,7 @@ def R2_debnath(z,lam):
 
 
 def horizon_cutoff(lam):
+    # Determines z value of where horizons merge into 1 in this problem (example 2).
     return np.cbrt((2./3.)/np.sqrt(lam))
 
 def horizon_cutoff_lam(z):
@@ -76,13 +80,19 @@ def Rdot(r,z,l):
     a = 2*E(z) + 2*M(z)/r + l*r*r/3.
     return -np.sqrt(a)
 
-def mu(rdot,r,z,l):
+def mu(rdot,r,z):
     e = E(z)
-    # rdot = Rdot(r,z,l)
-    a = sqrt(1 + 2*e);
+    a = np.sqrt(1 + 2*e);
     b = rdot + a;
     c = b/r;
     return -c/np.sqrt(2.0);
+
+def rho(rdot,r,z):
+    e = E(z)
+    a = np.sqrt(1 + 2*e);
+    b = rdot - a;
+    c = b/r;
+    return c/np.sqrt(2.0);
 
 # data2 = []
 # infile = open("test2.dat","r")
@@ -112,8 +122,10 @@ init = np.genfromtxt("z_out.dat")
 mu_roots = np.genfromtxt("mu_zeros.dat")
 app_roots = np.genfromtxt("apparent_zeros.dat")
 Rprime_roots = np.genfromtxt("Rprime_zeros.dat")
+R_init2d = np.genfromtxt("Example1/R_init.dat")
 # init = np.linspace(1e-4, 1,50 )
-
+for i in range(484):
+    print(R_init2d[i][0], R_init2d[i][1])
 
 surf = open("test2.dat",'r')
 rprime = open("Rprime.dat",'r')
@@ -134,8 +146,6 @@ for line in yprime:
     yprime_d.append([line])
 
 
-
-
 horz_r = []
 horz_t = []
 # fig = plt.subplots(111)
@@ -149,7 +159,7 @@ lam = 1.0
 # print("Maximum horizon formation point ",horizon_cutoff(lam))p_mu[:,dim2],c='r',lw=2.0,label="$\mu = 0 $")
 # plt.plot(app_a[:,dim1],app)
 
-split = 1.5
+split = 3
 
 # identify the different horizons as a split between them
 cosmo_mu = mu_roots[mu_roots[:,0] > split]
@@ -179,19 +189,25 @@ print(horizon_cutoff_lam(1.0))
 # ax.set_ylim3d(0,1)
 R_initial = []
 t_collapse = []
-
+mu_surf = []
 xg = 1
 yg = 1
 
-# for i in range(int(len(surf_d))):
+# for i in range(len(R_init2d)):
+#     Ez = E(R_init2d[i][0])
 #     raw = np.array(surf_d[i][0].split(),dtype=float)
-#     rawp = np.array(rprime_d[i][0].split(),dtype=float)
-#     scaled = [j for j in raw]
-#     yprime_z = []
+#     rawp = np.array(surf_d[i][0].split(),dtype=float)
+#     # mu_surf = []
+#     # rho_surf = []
+#     # for j in range(len(raw)):
+#     #     mu_surf.append(mu(raw[j],rawp[j],Ez))
+#     #     rho_surf.append(rho(raw[j],rawp[j],Ez))
+#     # print(len(mu_surf))
 #     # for j in range(len(raw)):
 #     #     yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
 #     # scaled = raw
 #     slice = np.array(raw,dtype=float)
+#     # slice2= np.array(rho_surf,dtype=float)
 #     # slice = np.array(surf_d[i][0].split(),dtype=float)
 
 #     # t_collapse.append(time[len(slice)-2])
@@ -199,52 +215,57 @@ yg = 1
 #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
 #     try:
 #         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
-#     #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
 #     except:
 #         continue
+#     # plt.plot(time[0:len(slice2)],slice2,lw=0.5,c='r')#c=cm.gnuplot(init[i])))
+#     # try:
+#     #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+#     # #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+#     # except:
+#     #     continue
 
 
 
 # Pick the solution along the curve z = 0.625... this is i = 50 in surf
-qq = 50
-t_index = -100
+# qq = 50
+# t_index = -100
 
  
-shell_R  = np.array(surf_d[qq][0].split(),dtype=float)
-shell_Rp = np.array(rprime_d[qq][0].split(),dtype=float)
-shell_t  = time[0:len(shell_R)]
-print("z, t(coll - 10 steps), len(R_shell)    ")
-print(init[qq], shell_t[t_index], len(shell_R))
+# shell_R  = np.array(surf_d[qq][0].split(),dtype=float)
+# shell_Rp = np.array(rprime_d[qq][0].split(),dtype=float)
+# shell_t  = time[0:len(shell_R)]
+# print("z, t(coll - 10 steps), len(R_shell)    ")
+# print(init[qq], shell_t[t_index], len(shell_R))
 
-zp = init[qq]
-Rr = shell_R[qq]
-Rpr = shell_Rp[qq]
+# zp = init[qq]
+# Rr = shell_R[qq]
+# Rpr = shell_Rp[qq]
 
 
-sc_radius = np.sqrt(m.pow(zp,2)*(Rr - zp*Rpr)/(zp*Rpr + Rr))
-print(sc_radius)
+# sc_radius = np.sqrt(m.pow(zp,2)*(Rr - zp*Rpr)/(zp*Rpr + Rr))
+# print(sc_radius)
 
-l = 5*sc_radius
-ng = 100
-z_pos = init[qq]
-x_grid = np.linspace(-l,l,ng)
-y_grid = np.linspace(-l,l,ng)
+# l = 5*sc_radius
+# ng = 100
+# z_pos = init[qq]
+# x_grid = np.linspace(-l,l,ng)
+# y_grid = np.linspace(-l,l,ng)
 
-X,Y = np.meshgrid(x_grid,y_grid)
+# X,Y = np.meshgrid(x_grid,y_grid)
 
-kappa = 8*np.pi
-height = np.zeros((len(x_grid),len(y_grid)))
-ysol = np.zeros((len(x_grid),len(y_grid)))
-density = np.zeros((len(x_grid),len(y_grid)))
-for i in range(len(x_grid)):
-    for j in range(len(y_grid)):
-        xp = x_grid[i]
-        yp = y_grid[j]
-        zp = z_pos
-        R = shell_R[t_index]
-        Rp = shell_Rp[t_index]
-        height[i][j] = np.abs(Yprime(R,Rp,zp,xp,yp))
-        density[i][j] = Density(R,Rp,zp,xp,yp)
+# kappa = 8*np.pi
+# height = np.zeros((len(x_grid),len(y_grid)))
+# ysol = np.zeros((len(x_grid),len(y_grid)))
+# density = np.zeros((len(x_grid),len(y_grid)))
+# for i in range(len(x_grid)):
+#     for j in range(len(y_grid)):
+#         xp = x_grid[i]
+#         yp = y_grid[j]
+#         zp = z_pos
+#         R = shell_R[t_index]
+#         Rp = shell_Rp[t_index]
+#         height[i][j] = np.abs(Yprime(R,Rp,zp,xp,yp))
+#         density[i][j] = Density(R,Rp,zp,xp,yp)
 
         # y_value = shell_R[t_index]/H(z_pos,x_grid[i],y_grid[j])
 
@@ -354,13 +375,13 @@ plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0)#, label="$\Lambda
 plt.title("Formation of Cosmological and Apparent Horizons \n $\Lambda = 0.443$")
 
 
-
+plt.grid(True)
 plt.ylabel("R(t,z)")
 plt.xlabel("time")
 # plt.yscale("log")
-plt.ylim(0,2.7)
-plt.xlim(0,29)
-plt.legend(loc="lower left")
+plt.ylim(0,10)
+plt.xlim(0,20)
+plt.legend(loc="best")
 # plt.colorbar()
 plt.show()
 # print(np.array(len(surf_d[20][0].split(" "))))
