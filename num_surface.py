@@ -193,36 +193,36 @@ mu_surf = []
 xg = 1
 yg = 1
 
-# for i in range(len(R_init2d)):
-#     Ez = E(R_init2d[i][0])
-#     raw = np.array(surf_d[i][0].split(),dtype=float)
-#     rawp = np.array(surf_d[i][0].split(),dtype=float)
-#     # mu_surf = []
-#     # rho_surf = []
-#     # for j in range(len(raw)):
-#     #     mu_surf.append(mu(raw[j],rawp[j],Ez))
-#     #     rho_surf.append(rho(raw[j],rawp[j],Ez))
-#     # print(len(mu_surf))
-#     # for j in range(len(raw)):
-#     #     yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
-#     # scaled = raw
-#     slice = np.array(raw,dtype=float)
-#     # slice2= np.array(rho_surf,dtype=float)
-#     # slice = np.array(surf_d[i][0].split(),dtype=float)
+for i in range(len(R_init2d)):
+    Ez = E(R_init2d[i][0])
+    raw = np.array(surf_d[i][0].split(),dtype=float)
+    rawp = np.array(surf_d[i][0].split(),dtype=float)
+    # mu_surf = []
+    # rho_surf = []
+    # for j in range(len(raw)):
+    #     mu_surf.append(mu(raw[j],rawp[j],Ez))
+    #     rho_surf.append(rho(raw[j],rawp[j],Ez))
+    # print(len(mu_surf))
+    # for j in range(len(raw)):
+    #     yprime_z.append(rawp[j] - raw[j]*Hprime(init[i],xg,yg)/H(init[i],xg,yg))
+    # scaled = raw
+    slice = np.array(raw,dtype=float)
+    # slice2= np.array(rho_surf,dtype=float)
+    # slice = np.array(surf_d[i][0].split(),dtype=float)
 
-#     # t_collapse.append(time[len(slice)-2])
-#     # R_initial.append(slice[0])
-#     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-#     try:
-#         plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
-#     except:
-#         continue
-#     # plt.plot(time[0:len(slice2)],slice2,lw=0.5,c='r')#c=cm.gnuplot(init[i])))
-#     # try:
-#     #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
-#     # #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
-#     # except:
-#     #     continue
+    # t_collapse.append(time[len(slice)-2])
+    # R_initial.append(slice[0])
+    # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+    try:
+        plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+    except:
+        continue
+    # plt.plot(time[0:len(slice2)],slice2,lw=0.5,c='r')#c=cm.gnuplot(init[i])))
+    # try:
+    #     plt.plot(time[0:len(slice)],slice,lw=0.5,c='b')#c=cm.gnuplot(init[i]))
+    # #     # ax.plot(time[0:len(slice)],slice,init[i],lw=2)
+    # except:
+    #     continue
 
 
 
@@ -372,7 +372,7 @@ plt.plot(cosmo_a[:,dim1],cosmo_a[:,dim2], ls=":",c='k',lw=2.0)#, label="$\Lambda
 # plt.title("Collapse Time for a shell of Initial Radius R=R(z,t=0), $\Lambda = {0:2.3f} $".format(lam))
 
 # plt.title("Map of $|Y_{,z}|$ with S(z) = $\sqrt{2}z$, $P(z)=Q(z)=4z $" + "\n $\Lambda = {0}$".format(lam))
-plt.title("Formation of Cosmological and Apparent Horizons \n $\Lambda = 0.443$")
+plt.title("$\Lambda = 0.1$")
 
 
 plt.grid(True)
@@ -380,7 +380,7 @@ plt.ylabel("R(t,z)")
 plt.xlabel("time")
 # plt.yscale("log")
 plt.ylim(0,10)
-plt.xlim(0,20)
+plt.xlim(0,10)
 plt.legend(loc="best")
 # plt.colorbar()
 plt.show()

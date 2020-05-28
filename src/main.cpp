@@ -536,8 +536,8 @@ int main(int argc, char** argv) {
     // Initial Conditions and parameter values
     double t_start = 0;
     double t_end = 20;
-    double dt = 0.0001;
-    double lambda =0.001;// pow(2./(3.*pow(1.0,3)),2);
+    double dt = 0.001;
+    double lambda =0.1;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
