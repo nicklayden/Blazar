@@ -1,6 +1,6 @@
 
 #compiler
-cxx = g++
+cxx = g++-10
 
 # executable name
 program = run

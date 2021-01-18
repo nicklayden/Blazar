@@ -52,13 +52,15 @@ def sc_radius(R,Rp,z):
 # Loading all data from simulations, R', R, Rdot, Y', z, t
 # Time grid currently is equivalent for all solution curves.
 #   -- might need to change in the future.
-data_rz = load_data("Rprime.dat")
-data_yz = load_data("Yprime.dat")
-data_rt = load_data("rdot.dat")
+# data_rz = load_data("Rprime.dat")
+# data_yz = load_data("Yprime.dat")
+# data_rt = load_data("rdot.dat")
 data_r  = load_data("test2.dat")
 time    = np.genfromtxt("tsol.dat")
 data_z  = np.genfromtxt("z_out.dat")
-
+data_ah_mu = load_data("mu_zeros.dat")
+data_ah_mu = np.array(data_ah_mu)
+data_ah_mu = data_ah_mu[data_ah_mu[:,0] > 3]
 # t = np.linspace(0,20,200001)
 print(len(data_r[1]))
 
@@ -66,39 +68,75 @@ print(len(data_r[1]))
 # Construct dataframes and panels of the data
 #
 # convert None type values or NaN types to R=0 for R solutions
-df_rt = pd.DataFrame(data_rt,data_z,columns=time)
-df_rz = pd.DataFrame(data_rz,data_z,columns=time)
-df_r  = pd.DataFrame(data_r ,data_z,columns=time)
+# df_rt = pd.DataFrame(data_rt,data_z,columns=time)
+# df_rz = pd.DataFrame(data_rz,data_z,columns=time)
+# df_r  = pd.DataFrame(data_r, data_z,columns=time)
  
+# df_rt = pd.DataFrame(data_rt)
+# df_rz = pd.DataFrame(data_rz)
+# df_r  = pd.DataFrame(data_r)
 
-#########
-# Animation of the Y(t,r=c,x,y) function as a heatmap
-#
-# Indices for the z=constant surface and a starting point in time
-t_i = 4000
-z_i = 5
-a = 1
-N = 100
+# #########
+# # Animation of the Y(t,r=c,x,y) function as a heatmap
+# #
+# # Indices for the z=constant surface and a starting point in time
+# t_i = 4000
+# z_i = 5
+# a = 2
+# N = 50
 
-zp = data_z[z_i]
-R  = df_r.iloc[z_i][time[t_i]]
-Rp = df_rz.iloc[z_i][time[t_i]]
+# zp = data_z[z_i]
+# R  = df_r.iloc[z_i][time[t_i]]
+# Rp = df_rz.iloc[z_i][time[t_i]]
 
-x_g = np.linspace(-a,a,N)
-y_g = np.linspace(-a,a,N)
+# x_g = np.linspace(-a,a,N)
+# y_g = np.linspace(-a,a,N)
 
-y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
-# roots = zero_2d(y_surf,x_g,y_g)
+# y_surf = surface(Yprime, x_g,y_g,R,Rp,zp)
+# # roots = zero_2d(y_surf,x_g,y_g)
 
-print("R = ", R)
-print("R'= ", Rp)
-print("z = ", zp)
-print("Calculated SC radius: ", sc_radius(R,Rp,zp))
+# print("R = ", R)
+# print("R'= ", Rp)
+# print("z = ", zp)
+# print("Calculated SC radius: ", sc_radius(R,Rp,zp))
 # print("Root finder result", np.sqrt(roots[0][0]**2 + roots[0][1]**2))
 
-df_surf = pd.DataFrame(y_surf)
+# df_surf = pd.DataFrame(y_surf)
+# sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
 
-sb.heatmap(df_surf,vmin=0,xticklabels=df_surf.columns.values.round(2))
+
+length = len(data_z)
+print(data_r[0][0])
+# profile = [data_r[i,j]/data_rz[i,j] for i in range(0,length)]
+profile_r = []
+profile_rz = []
+# sc_condition_t = []
+sc_condition = []
+# for j in range(len(time)):
+#     sc_condition_t = []
+#     for i in range(len(data_z)):
+#         profile_r.append(data_r[i][j])
+#         profile_rz.append(data_rz[i][j])
+#         sc_condition_t.append(data_r[i][j]/data_rz[i][j])
+#     sc_condition.append(sc_condition_t)
+
+# for i in range(len(data_z)):
+#     plt.plot(data_z,sc_condition[0])
+
+# plt.plot(data_z, [data_r[i,j]/data_rz[i,j] for i in range(0,length)] )
+
+
+print(len(time))
+print(len(data_r))
+
+for i in range(len(data_z)):
+    plt.plot(time[0:len(data_r[i])],data_r[i],c='b')
+
+plt.plot(data_ah_mu[:,2],data_ah_mu[:,0],c='r')
+plt.ylim(0,6)
+plt.xlim(0,25)
+# plt.plot(data_z,[e2_R0_max(i)/ example2_Rprime_init(i) for i in data_z] )
+# plt.plot(data_z,data_z)
 plt.show()
 
 # for z_i in range(80):

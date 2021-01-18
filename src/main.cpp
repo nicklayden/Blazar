@@ -24,6 +24,8 @@
 // Note: in mpfr, expression templates are disabled. This reduces compiles but increases runtime.
 #include <boost/numeric/odeint/integrate/integrate_const.hpp>
 #include <boost/numeric/odeint.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 // Graphics libraries
 // #include <SFML/Graphics.hpp>
@@ -39,15 +41,31 @@
 // typedef boost::multiprecision::cpp_dec_float_50 mp_type;
 namespace mp = boost::multiprecision;
 typedef mp::mpfr_float_100 mp_type; // faster compile time
-
-
+typedef boost::function<mp_type(mp_type,mp_type)> R2_function; // Function F: R2 -> R
 // Preprocessor defines
 #define PI M_PIl
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::vector<mp_type> > domain, std::string filename);
+// void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::vector<mp_type> > domain, std::string filename);
+void compute_and_save_zero_set(R2_function f, std::vector<std::vector<mp_type> > domain, std::string filename);
 std::vector<std::vector<double> > read_file(std::ifstream& input);
+void compute_zero_set_3D( double (*f)(double,double,double), std::vector<double> domain );
 
 
+
+
+inline mp_type gaussian2(mp_type x, mp_type y) {
+    return exp(x*x + y*y ) - 1;
+}
+
+inline double Dave(double r, double th, double u) {
+    // Find the zeros of this function in 3D.
+    // Variables: (r,theta,u)
+    // Ranges: Theta in (0,2pi)
+    //         r in (0,x)
+    //         u in (-y,y)
+    // where x =10, y=10 
+    return 0.625e-1 * (cos(th) - 0.1e1) * (cos(th) + 0.1e1) * sqrt(0.144e3 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) + 0.216e3 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(r, 0.5e1) + 0.1406250000e0 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.4e1) * r * r * tanh(0.6e0 * u) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.5400000e1 * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(r, 0.3e1) * tanh(0.6e0 * u) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.2e1) + 0.54000000e1 * pow(tanh(0.6e0 * u), 0.2e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.2e1) * pow(r, 0.3e1) * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.6300000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * tanh(0.6e0 * u) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.2e1) + 0.30000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(cos(th), 0.2e1) * pow(r, 0.3e1) + 0.90000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.2e1) * r * r + 0.1296000e2 * pow(tanh(0.6e0 * u), 0.3e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.6e1) + 0.129600e2 * pow(tanh(0.6e0 * u), 0.2e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.6e1) + 0.1440e3 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * tanh(0.6e0 * u) + 0.6480e2 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.6e1) * tanh(0.6e0 * u) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.8640e2 * tanh(0.6e0 * u) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(r, 0.5e1) * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.5062500000e-1 * pow(tanh(0.6e0 * u), 0.2e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.4e1) * r * r + 0.900000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.2e1) * r * r * tanh(0.6e0 * u) + 0.162000000e1 * pow(tanh(0.6e0 * u), 0.2e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * pow(cos(th), 0.2e1) + 0.86400e2 * pow(tanh(0.6e0 * u), 0.2e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(r, 0.5e1) * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.1620000000e1 * pow(tanh(0.6e0 * u), 0.3e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * pow(cos(th), 0.2e1) + 0.5062500000e-1 * pow(tanh(0.6e0 * u), 0.3e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.4e1) * r * r + 0.244140625e-3 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.4e1) * pow(cos(th), 0.6e1) + 0.81e2 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.4e1) * pow(r, 0.6e1) + 0.1080e3 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(r, 0.5e1) * tanh(0.6e0 * u) + 0.7421875e-1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.4e1) * pow(cos(th), 0.4e1) * r * r + 0.46875000e-1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(cos(th), 0.4e1) * tanh(0.6e0 * u) * r + 0.150000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(cos(th), 0.2e1) * pow(r, 0.3e1) * tanh(0.6e0 * u) + 0.2250000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(tanh(0.6e0 * u), 0.2e1) * pow(cos(th), 0.2e1) * r * r + 0.4050000000e0 * pow(tanh(0.6e0 * u), 0.4e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * pow(cos(th), 0.2e1) + 0.1265625000e-1 * pow(tanh(0.6e0 * u), 0.4e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(cos(th), 0.4e1) * r * r + 0.32400e2 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.6e1) * pow(tanh(0.6e0 * u), 0.2e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.216000e2 * pow(tanh(0.6e0 * u), 0.3e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(r, 0.5e1) * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.9375000e-1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.3e1) * pow(cos(th), 0.4e1) * r + 0.31500000e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.4e1) * pow(tanh(0.6e0 * u), 0.2e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.2e1) + 0.7031250000e-1 * pow(tanh(0.6e0 * u), 0.2e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.4e1) * r * r * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) + 0.135000000e1 * pow(tanh(0.6e0 * u), 0.3e1) * (0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1)) * pow(cos(th), 0.2e1) * pow(r, 0.3e1) * (0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1)) + 0.61875e1 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.4e1) * pow(r, 0.4e1) * pow(cos(th), 0.2e1) + 0.3600e2 * pow(0.30e0 - 0.30e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(tanh(0.6e0 * u), 0.2e1) * pow(r, 0.4e1) + 0.3240000e1 * pow(tanh(0.6e0 * u), 0.4e1) * pow(0.6e0 - 0.6e0 * pow(tanh(0.6e0 * u), 0.2e1), 0.2e1) * pow(r, 0.6e1));
+}
 
 inline double S(double z) {
     return sqrt(2)*z;
@@ -191,7 +209,7 @@ inline double energy_e2(double z) {
     rc = 10.0;
     rw = 1.0;
     n1 = 8;
-    n2 = 10;
+    n2 = 9;
 
     a = -0.5*pow(z/rc,2);
     b = pow(z/rw,n1);
@@ -466,12 +484,12 @@ int main(int argc, char** argv) {
     std::vector<mp_type> z_roots, eta_roots;
     std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
-    z_init = 0. +  1e-4;
-    z_end = 1.;
-    eta_init = 0.7;
-    eta_end = 1.2;
-    z_n = 60;
-    eta_n = 80;
+    z_init = -5. +  1e-4;
+    z_end = 5.;
+    eta_init = -5;
+    eta_end = 5;
+    z_n = 100;
+    eta_n = 100;
 
     // Choosing x,y position in the spacetime for the quasispherical case.
     x_grid = 0;
@@ -510,13 +528,15 @@ int main(int argc, char** argv) {
         z_out << z_grid[i] << std::endl;
     }
 
+
+    std::cout << "WTF test" << std::endl;
     // compute_and_save_zero_set(Shellfocus_sing,coarse_domain,"para.dat");
     // compute_and_save_zero_set(alan_theta,coarse_domain,"para.dat");
     // compute_and_save_zero_set(plane_para_ellipse,time_example1,"para2.dat");
     // compute_and_save_zero_set(alan_theta,coarse_domain,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
 
-    // compute_and_save_zero_set(gaussian,coarse_domain,"alan_f.dat");
+    compute_and_save_zero_set(gaussian2,coarse_domain,"alan_f.dat");
 
 
     /**
@@ -535,15 +555,16 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 20;
+    double t_end = 100;
     double dt = 0.001;
-    double lambda =0.1;// pow(2./(3.*pow(1.0,3)),2);
+    double lambda =1.0;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
     for (int i = 0; i < t_sol.size(); ++i)
     {
         tsol_f << t_sol[i] << std::endl;
     }
+    tsol_f << t_end + dt << std::endl;
 
     // Testing the horizon locations with the table in Debnath et al 2006
     for (int i = 0; i < z_grid.size(); ++i)
@@ -567,16 +588,17 @@ int main(int argc, char** argv) {
     double z_value;
     std::cout << "Calculating solution curve for i= " << std::endl;
     // Looping through all initial conditions to get a series of solution curves in the z space.
-    for (size_t i = 0; i < file_input.size(); i++)
+    for (size_t i = 0; i < z_grid.size(); i++)
     {
+        // std::cout << "Make it to iteration: " << i << std::endl;
         // Initial conditions for example 1:
-        r_curve[0] = file_input[i][1];
-        z_value = file_input[i][0];
+        // r_curve[0] = file_input[i][1];
+        // z_value = file_input[i][0];
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
 
         // Initial conditions for example 2: influenced by exact soln
-        // r_curve[0] = example2_Rmax(z_grid[i]);
-        // r_curve[1] = example2_Rprime_init(z_grid[i]);
+        r_curve[0] = example2_Rmax(z_grid[i]);
+        r_curve[1] = example2_Rprime_init(z_grid[i]);
 
         // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
         // r_curve[0] = pow(z_grid[i],2)/2.;
@@ -596,20 +618,19 @@ int main(int argc, char** argv) {
         // r_curve[0] = 10*z_grid[i];
 
         // ODE to solve for each initial condition. PBH Formation!
-        // ode_e2 primordial_bh(z_grid[i],lambda,false,x_grid,y_grid);
-        // boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
-        // full_solution.push_back(R_sol);
+        ode_e2 primordial_bh(z_grid[i],lambda,false,x_grid,y_grid);
+        boost::numeric::odeint::integrate_const(stepper,primordial_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        full_solution.push_back(R_sol);
         
         // ODE Example 1 GBH Formation.
-        ode_e1 galactic_bh(z_value,lambda,false);
-        boost::numeric::odeint::integrate_const(stepper,galactic_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
-        full_solution.push_back(R_sol);
+        // ode_e1 galactic_bh(z_value,lambda,false);
+        // boost::numeric::odeint::integrate_const(stepper,galactic_bh, r_curve, t_start,t_end,dt,push_back_state_and_time(R_sol,t_sol));
+        // full_solution.push_back(R_sol);
 
 
         R_sol.clear();
-
-
     }
+
     std::cout << "Completed ODE solutions" << std::endl;
     std::cout << "Saving solution curves to file" << std::endl;
     // Removing the NaN values from the solution curve vectors.    
@@ -627,8 +648,8 @@ int main(int argc, char** argv) {
     std::cout << "Check the functions used across examples!!" << std::endl;
 
     std::vector<std::vector<double> > mu_sol, rho_sol,app_sol;
-    std::vector<double> mu_slice, rho_slice, app_slice;
     double rdot_i, e_i, r_i,mu_i,app_i,z_i;
+    std::vector<double> mu_slice, rho_slice, app_slice;
     // Output some extra things like rho and mu
     std::cout << full_sol_transformed.size() << std::endl;
     for (int i = 0; i < full_sol_transformed.size(); ++i)
@@ -636,19 +657,19 @@ int main(int argc, char** argv) {
 
         for (int j = 0; j < full_sol_transformed[i].size(); ++j)
         {
-            z_i = file_input[i][0];
+            z_i = z_grid[i];
             r_i = full_sol_transformed[i][j];
-            rdot_i = Rdot_e1(r_i,z_i,lambda);
+            rdot_i = Rdot(r_i,z_i,lambda);
             
 
             // Change energy_e2 to energy_e1 for proper analysis.
-            e_i = energy_e11(z_i);
+            e_i = energy_e2(z_i);
             mu_i = mu_example2(rdot_i,r_i,e_i);
             // mu_i = apparent_horizon(r_i,file_input[i][0],lambda);
             // rdot_slice.push_back(Rdot(full_sol_transformed[i][j],file_input[i][0],lambda));
             mu_slice.push_back(mu_i);
 
-            app_i = apparent_horizon_e1(r_i,z_i,lambda);
+            app_i = apparent_horizon(r_i,z_i,lambda);
             app_slice.push_back(app_i);
         }
         mu_sol.push_back(mu_slice);
@@ -762,7 +783,7 @@ int main(int argc, char** argv) {
 } // End Main
 
 
-void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::vector<mp_type> > domain, std::string filename) {
+void compute_and_save_zero_set( R2_function f , std::vector<std::vector<mp_type> > domain, std::string filename) {
     // Input function: f = parameterization of R
     // Input domain: 2xN vector of meshgrid on which to compute the zero set.                 
     // Mesh in (z,eta) space
@@ -797,6 +818,34 @@ void compute_and_save_zero_set(mp_type (*f)(mp_type,mp_type), std::vector<std::v
     matrix_to_file(zero_set,outfile);
 
 }
+
+void compute_zero_set_3D( double (*f)(double,double,double), std::vector<double> domain ) {
+    // Compute zero sets of the curried function f(C,th,u) where C = const for each slice
+    // call the bracket_secant_method used for functions in R2, curry r at each step
+    // i.e. curry f s.t. g(th,u) = f(C,th,u)
+    // Curry function using boost::function and boost::bind.
+
+    // Define grids in all 3 dimensions
+
+    // Main loop over curried dimension
+    // redefine the function with currying parameter at each step.
+    // solve bracket_secant_method for each curried function f and output the file.
+
+    // std::vector<double> rgrid,thgrid,ugrid;
+
+    // rgrid  = create_grid(0,10,100);
+    // thgrid = create_grid(0,2*M_PI,100);
+    // ugrid  = create_grid(-10,10,100);
+
+
+
+
+
+}
+
+
+
+
 
 std::vector<std::vector<double> > read_file(std::ifstream& input) {
     // Important note: This reads across rows, then columns, stores nxn array into nx1.

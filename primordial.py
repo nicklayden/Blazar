@@ -96,10 +96,40 @@ def Mbarprime(z,x,y):
 # Parameters n1,n2 > 2, rw=1, rc = 0.8-10
 #
 #
-def E(z):
-    return 0; 
 
+def E_model_D(z):
+    # Parameters chosen to work for a model with Lambda=0,
+    # Shell crossings appear INSIDE horizon.
+    rc = 10.0
+    rw = 1.0
+    n1 = 8
+    n2 = 9
 
+    a = -0.5*math.pow(z/rc,2)
+    b = math.pow(z/rw,n1)
+    c = math.pow(z/rw,n2)
+    d = math.pow(1 + b - 2*c,4)
+
+    return a*d
+
+# def Eprime(z):
+#     cg = -z * math.pow(-0.2e1 * math.pow(z, 0.10e2) + math.pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * math.pow(-0.2e1 * math.pow(z, 0.10e2) + math.pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * math.pow(z, 0.9e1) + 0.8e1 * math.pow(z, 0.7e1)) / 0.50e2;
+#     return cg
+
+def Eprime(z):
+    # expanded version of Eprime above.
+    rc = 10.0
+    rw = 1.0
+    n1 = 8
+    n2 = 9
+
+    a = -z/(rc**2)
+    b = math.pow(1 + (z/rw)**n1 - 2*(z/rw)**n2,4)
+    c = -2*(z/rc)**2
+    d = math.pow(1 + (z/rw)**n1 - 2*(z/rw)**n2,3)
+    e = n1*z**(n1-1)/(rw**n1) - 2*n2*z**(n2-1)/(rw**n2)
+
+    return a*b + c*d*e
 
 ###############################################################################
 # Functions subject to the field equations: Y, Y', density
@@ -141,7 +171,6 @@ def Density(R,Rp,z,x,y):
 #
 #
 
-
 def mu(rd,r,E):
     # Cartan invariant mu. Collapsing phase horizon detector.
     # rd = R,t
@@ -150,27 +179,91 @@ def mu(rd,r,E):
     a = rd - np.sqrt(1-2*E)
     return -np.sqrt(2)*a/(2*r)
 
+################################################################################
+#
+#   Initial condition functions 
+#   
+#   For the functions R and R'
+#
+
+def e2_R0_max(z):
+    # Based on the lambda=0 problem. maximum expansion 
+    return -M(z)/E_model_D(z)
+
+def example2_Rprime_init(z):
+    Mp = 3*z*z/2.
+    a = -Mp/E_model_D(z)
+    b = (M(z)/math.pow(E_model_D(z),2))*Eprime(z)
+    return a + b
 
 
 
+class primordial_D():
+    def __init__(self, log=False,n1=8,n2=9):
+        # Initialization, need to set parameters for Model D for the E function
+        self.n1 = n1
+        self.n2 = n2
+        self.rc = 10.0
+        self.rw = 1.0
+
+        if log:
+            self.output()
+
+    def E(self,z):
+        # 'Energy' function E(z). z in (0,1). Defind by Model D in Harada/Jhingan
+        a = -0.5*math.pow(z/self.rc,2)
+        b = math.pow(z/self.rw,self.n1)
+        c = math.pow(z/self.rw,self.n2)
+        d = math.pow(1 + b - 2*c,4)
+
+        return a*d
+
+    def Eprime(self, z):
+        # Derivative of E(z) function.
+
+        n1 = self.n1
+        n2 = self.n2
+        rc = self.rc
+        rw = self.rw
+
+        a = -z/(rc**2)
+        b = math.pow(1 + (z/rw)**n1 - 2*(z/rw)**n2,4)
+        c = -2*(z/rc)**2
+        d = math.pow(1 + (z/rw)**n1 - 2*(z/rw)**n2,3)
+        e = n1*z**(n1-1)/(rw**n1) - 2*n2*z**(n2-1)/(rw**n2)
+
+        return a*b + c*d*e
 
 
+    def output(self):
+        print("Model D parameters:")
+        print("rc = ", self.rc)
+        print("rw = ", self.rw)
+        print("n1 = ", self.n1)
+        print("n2 = ", self.n2)
+        return
+
+    def mass(self, z):
+        # mass function M(z)
+        return (z**3)/2.
 
 
+    def mass_prime(self, z):
+        # derivative a off M(z), M'(z)
+        return 3*(z**2)/2.
 
+    def init_cond(self, z):
+        # Initial conditions for the problem, chosen to be 
+        # R(0,z) = -M(z)/E(z)
+        return -self.mass(z)/self.E(z)
 
+    def init_cond_prime(self, z):
+        # initial conditions for R'(0,z) (derivative of R(0,z)).
+        m = self.mass(z)
+        mp = self.mass_prime(z)
+        e = self.E(z)
+        ep = self.Eprime(z)
 
-
-
-
-
-
-
-
-
-
-
-
-
+        return m*ep/(e**2) - mp/e
 
 

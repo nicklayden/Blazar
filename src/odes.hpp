@@ -22,8 +22,6 @@ struct push_back_state_and_time
         m_states.push_back(x);
         m_times.push_back(t);
     }
-
-
 };
 
 /** 
@@ -76,6 +74,8 @@ class ode_e2 {
         // Fixing to the x=y=0 plane for now.
         double x,y;
         bool m_f;
+        int n1 = 8;
+        int n2 = 9;
         std::vector<double> full_sol,mu_sol;
         // std::ofstream stats_out.open("stats.dat");
         void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
@@ -110,12 +110,8 @@ class ode_e2 {
         double E(double z) {
             double a,b,c,d;
             double rc,rw;
-            int n1, n2;
             rc = 10.0;
             rw = 1.0;
-            n1 = 8;
-            n2 = 10;
-
 
             a = -0.5*pow(z/rc,2);
             b = pow(z/rw,n1);
@@ -165,8 +161,6 @@ class ode_e2 {
             d = Eprime(z);
             e = lambda*r*u/3.;
             return a*(b+c+d+e);
-
-
         }
 
         double udot_y(double u, double rd, double r) {
@@ -220,16 +214,31 @@ class ode_e2 {
             return 0;
         }
 
-
-
         double Mprime(double z) {
             return 3.*z*z/2.;
         }
+        // double Eprime(double z) {
+        //     double cg;
+        //     cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
+        //     return cg;
+        // }
         double Eprime(double z) {
-            double cg;
-            cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
-            return cg;
+            // # expanded version of Eprime above.
+            double rc,rw,a,b,c,d,e;
+
+            rc = 10.0;
+            rw = 1.0;
+
+            a = -z/(pow(rc,2)); 
+            b = pow(  (1 + pow((z/rw),n1) - 2*pow((z/rw),n2))    ,4);
+            c = -2*pow((z/rc),2);
+            d = pow(1 + pow((z/rw),n1) - 2*pow((z/rw),n2),3);
+            e = n1*pow(z,(n1-1))/(pow(rw,n1)) - 2*n2*pow(z,(n2-1))/(pow(rw,n2));
+
+            return a*b + c*d*e;
         }
+
+
 
 };
 
