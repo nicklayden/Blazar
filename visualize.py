@@ -52,16 +52,16 @@ def sc_radius(R,Rp,z):
 # Loading all data from simulations, R', R, Rdot, Y', z, t
 # Time grid currently is equivalent for all solution curves.
 #   -- might need to change in the future.
-# data_rz = load_data("Rprime.dat")
-# data_yz = load_data("Yprime.dat")
-# data_rt = load_data("rdot.dat")
+data_rz = load_data("Rprime.dat")
+data_yz = load_data("Yprime.dat")
+data_rt = load_data("rdot.dat")
 data_r  = load_data("test2.dat")
-time    = np.genfromtxt("tsol.dat")
+# time    = np.genfromtxt("tsol.dat")
 data_z  = np.genfromtxt("z_out.dat")
 data_ah_mu = load_data("mu_zeros.dat")
 data_ah_mu = np.array(data_ah_mu)
 data_ah_mu = data_ah_mu[data_ah_mu[:,0] > 3]
-# t = np.linspace(0,20,200001)
+time = np.linspace(0,20,100001)
 print(len(data_r[1]))
 
 ##########
@@ -111,7 +111,7 @@ print(data_r[0][0])
 profile_r = []
 profile_rz = []
 # sc_condition_t = []
-sc_condition = []
+# sc_condition = []
 # for j in range(len(time)):
 #     sc_condition_t = []
 #     for i in range(len(data_z)):
@@ -131,6 +131,9 @@ print(len(data_r))
 
 for i in range(len(data_z)):
     plt.plot(time[0:len(data_r[i])],data_r[i],c='b')
+
+
+
 
 plt.plot(data_ah_mu[:,2],data_ah_mu[:,0],c='r')
 plt.ylim(0,6)

@@ -71,11 +71,13 @@ class ode_e2 {
     public: 
         ode_e2(double z, double lambda,  bool signflag, double x=0, double y=0): m_z(z),m_l(lambda),m_f(signflag),x(x),y(y) {};
         double m_z,m_l;
-        // Fixing to the x=y=0 plane for now.
         double x,y;
         bool m_f;
-        int n1 = 8;
-        int n2 = 9;
+
+        // NOTE: These variables are static constexpr so they can be used by static member functions
+        //    i.e. these can be called WITHOUT instantiating the class!
+        static constexpr int n1 = 8;
+        static constexpr int n2 = 9;
         std::vector<double> full_sol,mu_sol;
         // std::ofstream stats_out.open("stats.dat");
         void operator() (const std::vector<double>& xin, std::vector<double>& dxdt, const double /* t */) {
@@ -93,21 +95,10 @@ class ode_e2 {
                 // Negative root: Rdot equation
                 dxdt[0] = -sqrt(2*E(m_z) + 2*M(m_z)/R + m_l*R*R/3.);
                 dxdt[1] = udot(Rp,dxdt[0],R,m_z,m_l);
-                
-
-                // WRONG
-                // Ydot equations -- full quasispherical problem here.
-                // dxdt[0] = -sqrt(2*M(m_z)/(R*pow(H(m_z,x,y),3)) + 2*E(m_z)/(pow(H(m_z,x,y),2)) + m_l*R*R/3. );
-                // dxdt[1] = udot_y(Rp,dxdt[0],R);
-
-                // If solving for Y now, need to rescale to get R back!
-
             }
-
-            // full_sol.push_back(dxdt[0]);
         }
 
-        double E(double z) {
+        static double E(double z) {
             double a,b,c,d;
             double rc,rw;
             rc = 10.0;
@@ -140,7 +131,7 @@ class ode_e2 {
             return -c/sqrt(2.0);
         }
 
-        double M(double z) {
+        static double M(double z) {
             // M = z^3/2   Jhinghan paper
             return z*z*z/2.;
 
@@ -185,7 +176,7 @@ class ode_e2 {
             return (a+b+c+d+f+g)/rd;   
         }
 
-        double H(double z,double x, double y) {
+        static double H(double z,double x, double y) {
             double h,a,b,s;
             s = S(z);
             a = (x-P(z))/s;
@@ -194,27 +185,27 @@ class ode_e2 {
             return h*(1. + pow(a,2) + pow(b,2));
         }
         
-        double Hprime(double z, double x, double y) {
+        static double Hprime(double z, double x, double y) {
             return (Sprime(z)*(pow(S(z),2) - x*x - y*y))/(2*pow(S(z),2));
         }
 
-        double Sprime(double z) {
+        static double Sprime(double z) {
             return sqrt(2);
         }
 
-        double S(double z) {
+        static double S(double z) {
             return sqrt(2)*z;
         }
 
-        double P(double z) {
+        static double P(double z) {
             return 0;
         }
 
-        double Q(double z) {
+        static double Q(double z) {
             return 0;
         }
 
-        double Mprime(double z) {
+        static double Mprime(double z) {
             return 3.*z*z/2.;
         }
         // double Eprime(double z) {
@@ -222,7 +213,7 @@ class ode_e2 {
         //     cg = -z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.4e1) / 0.100e3 - z * z * pow(-0.2e1 * pow(z, 0.10e2) + pow(z, 0.8e1) + 0.1e1, 0.3e1) * (-0.20e2 * pow(z, 0.9e1) + 0.8e1 * pow(z, 0.7e1)) / 0.50e2;
         //     return cg;
         // }
-        double Eprime(double z) {
+        static double Eprime(double z) {
             // # expanded version of Eprime above.
             double rc,rw,a,b,c,d,e;
 
@@ -238,7 +229,13 @@ class ode_e2 {
             return a*b + c*d*e;
         }
 
+        static double R_init(double z) {
+            return -M(z)/E(z);
+        }
 
+        static double Rp_init(double z) {
+            return (-Mprime(z)/E(z)) + (M(z)*Eprime(z)/(pow(E(z),2))); 
+        }
 
 };
 

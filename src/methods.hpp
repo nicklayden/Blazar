@@ -21,12 +21,12 @@ namespace mp = boost::multiprecision;
 typedef mp::mpfr_float_100 mp_type; // faster compile time
 
 
-template <typename T>
-using R2_function = boost::function<T(T,T)>;
+// template <typename T>
+// using R2_function = boost::function<T(T,T)>;
 
 
-template <typename T>
-using R3_function boost::function<T(T,T,T)>;
+// template <typename T>
+// using R3_function = boost::function<T(T,T,T)>;
 
 
 

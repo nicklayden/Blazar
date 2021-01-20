@@ -484,8 +484,8 @@ int main(int argc, char** argv) {
     std::vector<mp_type> z_roots, eta_roots;
     std::vector<std::vector<mp_type> > coarse_domain;
     // grid definitions:
-    z_init = -5. +  1e-4;
-    z_end = 5.;
+    z_init = 0 +  1e-4;
+    z_end = 1. - 1e-4;
     eta_init = -5;
     eta_end = 5;
     z_n = 100;
@@ -536,7 +536,7 @@ int main(int argc, char** argv) {
     // compute_and_save_zero_set(alan_theta,coarse_domain,"alan_f.dat");
     // compute_and_save_zero_set(R_example1,time_example1,"alantheta.dat");
 
-    compute_and_save_zero_set(gaussian2,coarse_domain,"alan_f.dat");
+    // compute_and_save_zero_set(gaussian2,coarse_domain,"alan_f.dat");
 
 
     /**
@@ -546,7 +546,7 @@ int main(int argc, char** argv) {
      * 
     */
     // Integration method
-    boost::numeric::odeint::runge_kutta_dopri5<std::vector<double> > stepper;
+    boost::numeric::odeint::runge_kutta_dopri5<std::vector<double>> stepper;
     // Solution containers
     std::vector<double> r_curve(2);
     std::vector<double> t_sol;
@@ -555,8 +555,8 @@ int main(int argc, char** argv) {
     std::vector<double> rdot_slice;
     // Initial Conditions and parameter values
     double t_start = 0;
-    double t_end = 100;
-    double dt = 0.001;
+    double t_end = 20;
+    double dt = 0.0001;
     double lambda =1.0;// pow(2./(3.*pow(1.0,3)),2);
     t_sol = create_grid(t_start,t_end,(int)(t_end-t_start)/dt);
 
@@ -597,8 +597,16 @@ int main(int argc, char** argv) {
         std::cout << i << "/" << z_grid.size() << "\r" << std::flush;
 
         // Initial conditions for example 2: influenced by exact soln
-        r_curve[0] = example2_Rmax(z_grid[i]);
-        r_curve[1] = example2_Rprime_init(z_grid[i]);
+        // r_curve[0] = example2_Rmax(z_grid[i]);
+        // r_curve[1] = example2_Rprime_init(z_grid[i]);
+
+
+        // Testing initial conditions called using static class member functions
+        r_curve[0] = ode_e2::R_init(z_grid[i]);
+        r_curve[1] = ode_e2::Rp_init(z_grid[i]);
+
+
+
 
         // Debnath and Nolan Comoving frame choice R(0,r)=r, R' = 1
         // r_curve[0] = pow(z_grid[i],2)/2.;
@@ -783,7 +791,7 @@ int main(int argc, char** argv) {
 } // End Main
 
 
-void compute_and_save_zero_set( R2_function f , std::vector<std::vector<mp_type> > domain, std::string filename) {
+void compute_and_save_zero_set( mp_type (*f)(mp_type,mp_type) , std::vector<std::vector<mp_type> > domain, std::string filename) {
     // Input function: f = parameterization of R
     // Input domain: 2xN vector of meshgrid on which to compute the zero set.                 
     // Mesh in (z,eta) space
