@@ -10,13 +10,25 @@
 #include <complex>
 #include <fstream>
 #include <iostream>
-
 #include <boost/function.hpp>
+
+
+
 
 // Type definitions
 // typedef boost::multiprecision::cpp_dec_float_50 mp_type;
 namespace mp = boost::multiprecision;
 typedef mp::mpfr_float_100 mp_type; // faster compile time
+
+
+template <typename T>
+using R2_function = boost::function<T(T,T)>;
+
+
+template <typename T>
+using R3_function boost::function<T(T,T,T)>;
+
+
 
 
 template <class T>
